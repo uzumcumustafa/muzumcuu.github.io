@@ -216,7 +216,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'OpenAI-Beta': 'assistants=v1',
-                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
                     },
                     body: JSON.stringify({
                         assistant_id: "asst_TWBykBcINZcvfdkFn0qo6fcn",
@@ -240,7 +240,7 @@
                     const statusRes = await fetch(`https://api.openai.com/v1/threads/${runData.thread_id}/runs/${runData.id}`, {
                         headers: {
                             'OpenAI-Beta': 'assistants=v1',
-                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                            'Authorization': `Bearer ${OPENAI_API_KEY}`
                         }
                     });
                     
@@ -251,7 +251,7 @@
                         const messagesRes = await fetch(`https://api.openai.com/v1/threads/${runData.thread_id}/messages`, {
                             headers: {
                                 'OpenAI-Beta': 'assistants=v1',
-                                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                                'Authorization': `Bearer ${OPENAI_API_KEY}`
                             }
                         });
                         
