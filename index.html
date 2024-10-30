@@ -203,7 +203,7 @@
             setLoading(true);
 
             try {
-                const res = await fetch('https://chat-backend-cqm9.onrender.com', {
+                const res = await fetch('https://chat-backend-cqm9.onrender.com/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
