@@ -2,33 +2,286 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iframe Example</title>
+    <title>Message Sender</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-        }
-        .iframe-container {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
         }
-        .iframe-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+
+        .character {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .character img {
             width: 100%;
             height: 100%;
+            object-fit: contain;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            margin-top: 350px;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 450px);
+        }
+
+        .form-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(33, 150, 243, 0.1);
+        }
+
+        .input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(33, 150, 243, 0.1);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.15);
+        }
+
+        .button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background-color: #2196F3;
+            color: white;
             border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+        }
+
+        .button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        .button:disabled {
+            background-color: #90CAF9;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response {
+            padding: 1.5rem;
+            border: 1px solid rgba(33, 150, 243, 0.1);
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .user-message {
+            background: rgba(33, 150, 243, 0.1);
+            margin-left: 2rem;
+        }
+
+        .assistant-message {
+            background: rgba(255, 255, 255, 0.8);
+            margin-right: 2rem;
+        }
+
+        .clear-button {
+            padding: 1rem 1.5rem;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-button:hover {
+            background-color: #cc0000;
         }
     </style>
 </head>
 <body>
-    <h1>Embed a URL in an Iframe</h1>
-    <div class="iframe-container">
-        <iframe src="https://mustafa976.sharepoint.com/sites/mustafatest/SitePages/ITHelpdeskHome.aspx" allowfullscreen></iframe>
+    <div class="character">
+        <img src="/Users/mustafauzumcu/Downloads/DALL·E 2024-10-28 21.25.41 - A children's storybook character of a 35-40 year old chubby man in a suit and tie, shown in a full-body view, standing in an office environment. The c.webp" alt="Character">
     </div>
+    <div class="container">
+        <div id="responseArea" class="response">
+            <div id="conversationHistory"></div>
+        </div>
+        <form id="messageForm" onsubmit="handleSubmit(event)">
+            <div class="form-container">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    class="input" 
+                    placeholder="Type your message..."
+                >
+                <button type="submit" class="button" id="submitButton">
+                    Send
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                    </svg>
+                </button>
+                <button type="button" id="clearButton" class="clear-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const submitButton = document.getElementById('submitButton');
+        const responseArea = document.getElementById('responseArea');
+        const conversationHistory = document.getElementById('conversationHistory');
+        const clearButton = document.getElementById('clearButton');
+        let isLoading = false;
+
+        clearButton.addEventListener('click', () => {
+            conversationHistory.innerHTML = '';
+        });
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message to conversation
+            addMessageToHistory('user', message);
+            messageInput.value = ''; // Clear input field
+
+            setLoading(true);
+            try {
+                const res = await fetch('https://api.openai.com/v1/threads/runs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'OpenAI-Beta': 'assistants=v1',
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        assistant_id: "asst_TWBykBcINZcvfdkFn0qo6fcn",
+                        thread: {
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: message
+                                }
+                            ]
+                        }
+                    })
+                });
+
+                const runData = await res.json();
+                
+                let complete = false;
+                while (!complete) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const statusRes = await fetch(`https://api.openai.com/v1/threads/${runData.thread_id}/runs/${runData.id}`, {
+                        headers: {
+                            'OpenAI-Beta': 'assistants=v1',
+                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                        }
+                    });
+                    
+                    const status = await statusRes.json();
+                    if (status.status === 'completed') {
+                        complete = true;
+                        
+                        const messagesRes = await fetch(`https://api.openai.com/v1/threads/${runData.thread_id}/messages`, {
+                            headers: {
+                                'OpenAI-Beta': 'assistants=v1',
+                                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                            }
+                        });
+                        
+                        const messages = await messagesRes.json();
+                        const assistantMessage = messages.data[0].content[0].text.value;
+                        addMessageToHistory('assistant', assistantMessage);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessageToHistory('assistant', 'An error occurred while sending the message.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            submitButton.disabled = loading;
+            const sendText = loading ? 'Sending...' : 'Send';
+            submitButton.innerHTML = `${sendText}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2Z"></path></svg>`;
+        }
+
+        function addMessageToHistory(role, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${role}-message`);
+            messageDiv.textContent = text;
+            conversationHistory.appendChild(messageDiv);
+            conversationHistory.scrollTop = conversationHistory.scrollHeight;
+        }
+    </script>
 </body>
 </html>
-
