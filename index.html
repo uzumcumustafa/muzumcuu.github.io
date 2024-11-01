@@ -544,6 +544,7 @@
         clearButton.addEventListener('click', () => {
             conversationHistory.innerHTML = '';
             clearButton.classList.add('hidden');
+            resetCharacterToDefault();
         });
 
         async function handleSubmit(e) {
@@ -775,7 +776,6 @@
             const characterMood = document.getElementById('characterMood');
             const defaultCharacter = document.getElementById('defaultCharacter');
             
-            // Statik resmi gizle, gif'i göster
             defaultCharacter.style.display = 'none';
             characterMood.style.display = 'block';
             
@@ -803,6 +803,16 @@
                 const randomIndex = Math.floor(Math.random() * happyGifs.length);
                 characterMood.src = happyGifs[randomIndex];
             }
+        }
+
+        function resetCharacterToDefault() {
+            const characterMood = document.getElementById('characterMood');
+            const defaultCharacter = document.getElementById('defaultCharacter');
+            
+            characterMood.style.display = 'none';
+            characterMood.src = '';
+            
+            defaultCharacter.style.display = 'block';
         }
     </script>
 </body>
