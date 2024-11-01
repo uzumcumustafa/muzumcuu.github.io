@@ -441,6 +441,27 @@
             0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
             100% { transform: translate(var(--tx), var(--ty)) scale(2); opacity: 0; }
         }
+
+        .flying-paper {
+            position: fixed;
+            width: 30px;
+            height: 40px;
+            background: white;
+            transform-origin: center;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        @keyframes throwPaper {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rotation));
+                opacity: 0.6;
+            }
+        }
     </style>
 </head>
 <body>
@@ -674,26 +695,52 @@
         }
 
         function createExplodingBalloon() {
-            const balloon = document.createElement('div');
-            balloon.className = 'exploding-balloon';
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
             
-            balloon.innerHTML = `
-                <svg viewBox="0 0 50 60" fill="#FF1744">
-                    <path d="M25,1.5c-12.5,0-22.5,10-22.5,22.5C2.5,36.5,25,58.5,25,58.5s22.5-22,22.5-34.5C47.5,11.5,37.5,1.5,25,1.5z"/>
-                    <path d="M25,58.5c0,0,0,2,0-0.5c0-2.5,0-2.5,0-2.5" stroke="#FF1744" stroke-width="2"/>
-                    <path d="M15,20 Q25,15 35,20" stroke="white" stroke-width="2" fill="none"/>
-                    <circle cx="18" cy="15" r="2" fill="white"/>
-                    <circle cx="32" cy="15" r="2" fill="white"/>
-                </svg>
-            `;
-            
-            document.body.appendChild(balloon);
-
-            setTimeout(() => {
-                createBalloonPop(balloon.getBoundingClientRect());
-                balloon.remove();
-                createSmokeEffect(balloon.getBoundingClientRect());
-            }, 2000);
+            // Create multiple papers
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const paper = document.createElement('div');
+                    paper.className = 'flying-paper';
+                    
+                    // Random initial position near center
+                    const startX = centerX + (Math.random() - 0.5) * 20;
+                    const startY = centerY + (Math.random() - 0.5) * 20;
+                    
+                    paper.style.left = `${startX}px`;
+                    paper.style.top = `${startY}px`;
+                    
+                    // Calculate random end position
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 1000 + 500;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.abs(Math.sin(angle) * distance); // Make sure papers fall downward
+                    
+                    paper.style.setProperty('--tx', `${tx}px`);
+                    paper.style.setProperty('--ty', `${ty}px`);
+                    paper.style.setProperty('--rotation', `${Math.random() * 720 - 360}deg`);
+                    
+                    // Add paper icon SVG
+                    paper.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="white" stroke="#999" stroke-width="1">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <line x1="10" y1="9" x2="8" y2="9"></line>
+                        </svg>
+                    `;
+                    
+                    document.body.appendChild(paper);
+                    
+                    // Apply animation
+                    paper.style.animation = `throwPaper ${1.5 + Math.random()}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+                    
+                    // Remove paper after animation
+                    setTimeout(() => paper.remove(), 2000);
+                }, i * 50); // Stagger the paper creation
+            }
         }
 
         function createBalloonPop(rect) {
