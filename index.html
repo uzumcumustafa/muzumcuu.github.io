@@ -522,13 +522,14 @@
                 }
 
                 const score = extractScore(data.response);
+                console.log('Extracted score:', score);
+
                 if (score !== null) {
                     currentScore = score;
-                    console.log('Score:', currentScore);
-                    
                     if (currentScore >= 7) {
                         createCelebration();
                     } else {
+                        console.log('Triggering exploding balloon for score:', currentScore);
                         createExplodingBalloon();
                     }
                 }
@@ -595,7 +596,7 @@
         }
 
         function extractScore(response) {
-            const scoreMatch = response.match(/Rating: (\d+\.?\d*)\/10/);
+            const scoreMatch = response.match(/(\d+\.?\d*)\/10/);
             if (scoreMatch) {
                 return parseFloat(scoreMatch[1]);
             }
