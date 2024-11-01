@@ -353,14 +353,15 @@
             }
         }
 
-        /* Balon animasyonu için yeni stiller */
+        /* Balon animasyonu için güncellenmiş stiller */
         .celebration-balloon {
             position: fixed;
-            animation: floatBalloon 6s ease-in infinite;
+            animation: floatBalloon 8s ease-in infinite;
             z-index: 1000;
-            width: 30px;
-            height: 40px;
+            width: 40px;
+            height: 50px;
             pointer-events: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
 
         @keyframes floatBalloon {
@@ -370,6 +371,25 @@
             }
             100% {
                 transform: translateY(-100vh) translateX(var(--x-move)) rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+        /* Konfeti animasyonu için yeni stiller */
+        .confetti {
+            position: fixed;
+            z-index: 999;
+            animation: confettiFall 5s ease-in-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -534,10 +554,14 @@
         }
 
         function createCelebration() {
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 25; i++) {
                 setTimeout(() => {
                     createBalloon();
-                }, i * 300);
+                }, i * 200);
+            }
+            
+            for (let i = 0; i < 50; i++) {
+                createConfetti();
             }
         }
 
@@ -545,7 +569,16 @@
             const balloon = document.createElement('div');
             balloon.className = 'celebration-balloon';
             
-            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+            const colors = [
+                '#FF1744',
+                '#00E676',
+                '#2979FF',
+                '#FFEA00',
+                '#FF4081',
+                '#00B0FF',
+                '#7C4DFF',
+                '#FF3D00'
+            ];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             
             balloon.innerHTML = `
@@ -555,8 +588,8 @@
                 </svg>
             `;
 
-            const xMove = Math.random() * 200 - 100;
-            const rotation = Math.random() * 360;
+            const xMove = Math.random() * 300 - 150;
+            const rotation = Math.random() * 720 - 360;
             
             balloon.style.setProperty('--x-move', `${xMove}px`);
             balloon.style.setProperty('--rotation', `${rotation}deg`);
@@ -564,9 +597,30 @@
             
             document.body.appendChild(balloon);
             
-            setTimeout(() => {
-                balloon.remove();
-            }, 6000);
+            setTimeout(() => balloon.remove(), 8000);
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            const colors = ['#FFC107', '#FF5722', '#2196F3', '#4CAF50', '#E91E63', '#9C27B0'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const size = Math.random() * 10 + 5;
+            
+            confetti.style.cssText = `
+                left: ${Math.random() * 100}vw;
+                width: ${size}px;
+                height: ${size}px;
+                background-color: ${randomColor};
+                transform: rotate(${Math.random() * 360}deg);
+                animation-delay: ${Math.random() * 2}s;
+            `;
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => confetti.remove(), 5000);
         }
     </script>
 </body>
