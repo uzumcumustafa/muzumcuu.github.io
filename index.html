@@ -64,11 +64,32 @@
             z-index: 1;
         }
 
-        .character img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            object-position: center;
+        .character img, .character-gif {
+            width: 180px;
+            height: 180px;
+            border: none;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .character img, .character-gif {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .character img, .character-gif {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (min-height: 1000px) {
+            .character img, .character-gif {
+                width: 220px;
+                height: 220px;
+            }
         }
 
         .container {
@@ -462,11 +483,17 @@
                 opacity: 0.6;
             }
         }
+
+        .character-gif {
+            width: 180px;
+            height: 180px;
+        }
     </style>
 </head>
 <body>
     <div class="character">
-        <img src="/Users/mustafauzumcu/Downloads/DALL·E 2024-10-28 21.25.41 - A children's storybook character of a 35-40 year old chubby man in a suit and tie, shown in a full-body view, standing in an office environment. The c.webp" alt="Character">
+        <img id="defaultCharacter" src="/Users/mustafauzumcu/Downloads/DALL·E 2024-10-28 21.25.41 - A children's storybook character of a 35-40 year old chubby man in a suit and tie, shown in a full-body view, standing in an office environment. The c.webp" alt="Character">
+        <iframe id="characterMood" src="" frameBorder="0" class="character-gif" style="display: none;" allowFullScreen></iframe>
     </div>
     <div class="container">
         <div id="responseArea" class="response">
@@ -785,6 +812,40 @@
                 document.body.appendChild(smoke);
                 
                 setTimeout(() => smoke.remove(), 2000);
+            }
+        }
+
+        function updateCharacterMood(score) {
+            const characterMood = document.getElementById('characterMood');
+            const defaultCharacter = document.getElementById('defaultCharacter');
+            
+            // Statik resmi gizle, gif'i göster
+            defaultCharacter.style.display = 'none';
+            characterMood.style.display = 'block';
+            
+            const sadGifs = [
+                "https://giphy.com/embed/KnrMjMUsuIs2tjdU9o",
+                "https://giphy.com/embed/hyyV7pnbE0FqLNBAzs",
+                "https://giphy.com/embed/5zoHyCdbtm8feNkIxJ",
+                "https://giphy.com/embed/ljtfkyTD3PIUZaKWRi",
+                "https://giphy.com/embed/zz2a5ctsXTzkidQVSM"
+            ];
+            
+            const happyGifs = [
+                "https://giphy.com/embed/cXblnKXr2BQOaYnTni",
+                "https://giphy.com/embed/IwAZ6dvvvaTtdI8SD5",
+                "https://giphy.com/embed/N5sN6rBWXOK1vAtnrz",
+                "https://giphy.com/embed/VMO6qeIbr7JRLnLTGw",
+                "https://giphy.com/embed/l0amJzVHIAfl7jMDos",
+                "https://giphy.com/embed/ynRrAHj5SWAu8RA002"
+            ];
+            
+            if (score < 7) {
+                const randomIndex = Math.floor(Math.random() * sadGifs.length);
+                characterMood.src = sadGifs[randomIndex];
+            } else {
+                const randomIndex = Math.floor(Math.random() * happyGifs.length);
+                characterMood.src = happyGifs[randomIndex];
             }
         }
     </script>
