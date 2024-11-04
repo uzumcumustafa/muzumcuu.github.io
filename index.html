@@ -58,10 +58,13 @@
             top: 2vh;
             left: 50%;
             transform: translateX(-50%);
-            width: 180px;
-            height: 180px;
+            width: 280px;
+            height: 280px;
             pointer-events: none;
             z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .character img, .character-gif {
@@ -267,21 +270,49 @@
         }
 
         /* Uçan kağıt animasyonu için stil */
-        @keyframes flyPaper {
+        @keyframes fly {
             0% {
-                transform: translate(0, 0) rotate(0deg);
+                left: -5%;
+                top: 50%;
+                transform: rotate(-10deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            25% {
+                left: 25%;
+                top: 30%;
+                transform: rotate(5deg);
+            }
+            50% {
+                left: 50%;
+                top: 55%;
+                transform: rotate(-5deg);
+            }
+            75% {
+                left: 75%;
+                top: 35%;
+                transform: rotate(5deg);
+            }
+            90% {
                 opacity: 1;
             }
             100% {
-                transform: translate(100px, -100px) rotate(45deg);
+                left: 105%;
+                top: 50%;
+                transform: rotate(-10deg);
                 opacity: 0;
             }
         }
 
-        .flying-paper {
-            position: fixed;
-            z-index: 1000;
-            animation: flyPaper 1s ease-out forwards;
+        .send-animation {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            animation: fly 3s ease-in-out;
+            z-index: 2;
         }
 
         .character-gif {
@@ -293,6 +324,98 @@
         .character {
             margin-top: 20px;
             margin-bottom: 20px;
+        }
+
+        /* Info butonu ve popup için stil */
+        .info-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .info-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .popup {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            width: 300px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .popup.active {
+            display: block;
+        }
+
+        /* Sürekli uçan kağıt animasyonu için stil */
+        @keyframes continuousFly {
+            0% {
+                transform: translate(-30px, 20px) rotate(-45deg);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translate(30px, -20px) rotate(45deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(30px, 20px) rotate(-45deg);
+                opacity: 0.9;
+            }
+            75% {
+                transform: translate(-30px, -20px) rotate(45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-30px, 20px) rotate(-45deg);
+                opacity: 0.9;
+            }
+        }
+
+        .response .flying-paper {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            transform-origin: center;
+            z-index: 1000;
+            animation: continuousFly 3s ease-in-out infinite;
+        }
+
+        /* Mesaj gönderme animasyonu için stil */
+        .form-container .flying-paper {
+            display: none; /* Text alanının üstündeki uçağı gizle */
+        }
+
+        .flying-paper svg {
+            width: 100%;
+            height: 100%;
+            color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -330,6 +453,26 @@
         </form>
     </div>
 
+    <button class="info-button" id="infoButton">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </button>
+
+    <div class="popup" id="infoPopup">
+        <h3 style="margin-top: 0; color: #333;">How to Interact with Our Chatbot Boss</h3>
+        <p style="color: #666; line-height: 1.5;">
+            <br>1. Greet the Boss: Start by saying hello to receive your topic for a time-off prompt.
+            <br>2. Write a Persuasive Prompt: Follow the given topic and craft a detailed, engaging prompt for the boss.
+            <br>3. Aim for High Quality: Include specific details, ask the chatbot to adopt a persona, or provide step-by-step instructions to increase your score.
+            <br>4. Watch Out for Feedback: The boss will rate your prompt with humor and a score. A score of 7 or higher means you get the day off!
+            <br>5. Enjoy the Interaction: Even if you don't earn the day off, the experience is sure to bring a laugh or two.
+            <br><br>Happy prompting!
+        </p>
+    </div>
+
     <script>
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
@@ -351,6 +494,22 @@
             e.preventDefault();
             const message = messageInput.value.trim();
             if (!message) return;
+
+            // Kağıt uçak animasyonu için
+            const paperPlane = document.createElement('div');
+            paperPlane.className = 'flying-paper';
+            paperPlane.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                </svg>
+            `;
+            
+            // Kağıt uçağın başlangıç pozisyonunu input'un yanına ayarla
+            const inputRect = messageInput.getBoundingClientRect();
+            paperPlane.style.left = `${inputRect.left}px`;
+            paperPlane.style.top = `${inputRect.top}px`;
+            document.body.appendChild(paperPlane);
 
             try {
                 setLoading(true);
@@ -394,6 +553,10 @@
                 addMessageToHistory('assistant', 'An error occurred while sending the message. Please try again.');
             } finally {
                 setLoading(false);
+                // Animasyon bittikten sonra kağıt uçağı kaldır
+                setTimeout(() => {
+                    paperPlane.remove();
+                }, 1000);
             }
         }
 
@@ -403,37 +566,64 @@
             
             if (loading) {
                 loadingAnimation = document.createElement('div');
-                loadingAnimation.className = 'loading-animation';
+                loadingAnimation.className = 'flying-paper';
                 loadingAnimation.innerHTML = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 2L11 13"></path>
                         <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
                     </svg>`;
                 
                 responseArea.appendChild(loadingAnimation);
                 
-                const moveInterval = setInterval(() => {
-                    if (loadingAnimation) {
-                        const padding = window.innerWidth <= 768 ? 30 : 50;
-                        const maxX = responseArea.clientWidth - padding;
-                        const maxY = responseArea.clientHeight - padding;
-                        
-                        const minX = padding;
-                        const minY = padding;
-                        
-                        const randomX = Math.random() * (maxX - minX) + minX;
-                        const randomY = Math.random() * (maxY - minY) + minY;
-                        
-                        loadingAnimation.style.transition = 'all 1s ease-in-out';
-                        loadingAnimation.style.left = `${randomX}px`;
-                        loadingAnimation.style.top = `${randomY}px`;
-                    }
-                }, 3000);
+                let currentX = 0;
+                let currentY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let angle = 0;
                 
-                loadingAnimation.moveInterval = moveInterval;
+                const animate = () => {
+                    if (!loadingAnimation || !isLoading) return;
+
+                    // Hedef noktaya ulaşıldıysa yeni hedef belirle
+                    const distance = Math.hypot(targetX - currentX, targetY - currentY);
+                    if (distance < 1) {
+                        const padding = 30;
+                        const maxX = responseArea.clientWidth - padding * 2;
+                        const maxY = responseArea.clientHeight - padding * 2;
+                        
+                        targetX = Math.random() * maxX + padding;
+                        targetY = Math.random() * maxY + padding;
+                        
+                        // Yeni rotaya göre açıyı güncelle
+                        angle = Math.atan2(targetY - currentY, targetX - currentX) * (180 / Math.PI);
+                    }
+
+                    // Yumuşak hareket için mevcut konumu güncelle
+                    const speed = 2;
+                    const dx = (targetX - currentX) / 20;
+                    const dy = (targetY - currentY) / 20;
+                    
+                    currentX += dx;
+                    currentY += dy;
+                    
+                    // Hafif salınım efekti ekle
+                    const wave = Math.sin(Date.now() / 300) * 5;
+                    
+                    loadingAnimation.style.transform = `translate(${currentX}px, ${currentY + wave}px) rotate(${angle + wave}deg)`;
+                    loadingAnimation.style.transition = 'transform 0.1s ease-out';
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                // İlk hedefi belirle ve animasyonu başlat
+                const padding = 30;
+                targetX = Math.random() * (responseArea.clientWidth - padding * 2) + padding;
+                targetY = Math.random() * (responseArea.clientHeight - padding * 2) + padding;
+                
+                animate();
+                
             } else {
                 if (loadingAnimation) {
-                    clearInterval(loadingAnimation.moveInterval);
                     loadingAnimation.remove();
                     loadingAnimation = null;
                 }
@@ -614,9 +804,30 @@
             
             defaultCharacter.style.display = 'block';
         }
+
+        // Info popup kontrolü
+        const infoButton = document.getElementById('infoButton');
+        const infoPopup = document.getElementById('infoPopup');
+        let isPopupVisible = false;
+
+        infoButton.addEventListener('click', () => {
+            isPopupVisible = !isPopupVisible;
+            infoPopup.classList.toggle('active');
+        });
+
+        // Popup dışına tıklandığında kapatma
+        document.addEventListener('click', (event) => {
+            if (isPopupVisible && 
+                !infoPopup.contains(event.target) && 
+                !infoButton.contains(event.target)) {
+                isPopupVisible = false;
+                infoPopup.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>
+
 
 
 
