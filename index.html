@@ -233,7 +233,7 @@
 
             .left-side {
                 width: 100%;
-                padding: 20px;
+                padding: 15px;
                 height: 100vh;
             }
 
@@ -242,13 +242,13 @@
             }
 
             h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
+                font-size: 20px;
+                margin-bottom: 5px;
             }
 
             .chat-box {
-                height: calc(100% - 80px);
-                margin-top: 10px;
+                height: calc(100% - 60px);
+                margin-top: 5px;
             }
 
             .message {
@@ -256,16 +256,18 @@
             }
 
             .input-wrapper {
-                padding: 15px;
+                padding: 10px;
+                gap: 8px;
             }
 
             .input-field {
-                padding: 12px;
+                padding: 8px;
                 font-size: 14px;
             }
 
             .button {
                 padding: 6px;
+                transform: scale(0.9);
             }
 
             .button svg {
@@ -283,7 +285,7 @@
             }
             
             .header-controls {
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
 
             .settings-menu {
@@ -293,17 +295,36 @@
                 right: 20px;
                 margin-top: 0;
             }
+
+            /* Ensure buttons are visible without horizontal scroll */
+            .input-wrapper {
+                flex-wrap: nowrap;
+                justify-content: space-between;
+            }
+
+            /* Make input field slightly smaller to accommodate buttons */
+            .input-field {
+                width: calc(100% - 120px);
+            }
         }
 
         /* Çok küçük ekranlar için ek düzenlemeler */
         @media screen and (max-width: 480px) {
             .left-side {
-                padding: 15px;
+                padding: 10px;
             }
 
-            h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
+            .input-wrapper {
+                padding: 8px;
+                gap: 5px;
+            }
+
+            .button {
+                transform: scale(0.85);
+            }
+
+            .input-field {
+                width: calc(100% - 100px);
             }
 
             .message-content {
@@ -757,7 +778,7 @@
 
     <div class="left-side">
         <div class="header-controls">
-            <h1>Angry Boss</h1>
+            <h1>Welcome!</h1>
             <div class="settings-container">
                 <button class="button settings-button" id="settingsButton">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1076,6 +1097,7 @@
             if (savedName) {
                 document.querySelector('h1').textContent = getGreeting(savedName);
             } else {
+                document.querySelector('h1').textContent = 'Welcome!';
                 showNamePrompt();
             }
         });
