@@ -764,6 +764,191 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        /* Header controls için mobil düzenlemeler */
+        @media screen and (max-width: 768px) {
+            .header-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 0;
+                margin-bottom: 10px;
+            }
+
+            .header-controls h1 {
+                font-size: 20px;
+                width: calc(100% - 50px); /* Settings butonu için alan bırak */
+                margin: 0;
+            }
+
+            .settings-container {
+                padding-left: 0;
+            }
+        }
+
+        /* Input wrapper için mobil düzenlemeler */
+        @media screen and (max-width: 768px) {
+            .input-wrapper {
+                padding: 8px;
+                gap: 6px;
+            }
+
+            .input-field {
+                padding: 8px;
+                font-size: 14px;
+                width: calc(100% - 110px); /* Butonlar için daha fazla alan */
+            }
+
+            .button {
+                padding: 6px;
+                transform: scale(0.9);
+            }
+
+            .button svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            /* Emoji picker pozisyonu düzeltmesi */
+            .emoji-picker {
+                right: -10px;
+                bottom: 120%;
+                width: 200px;
+            }
+        }
+
+        /* Daha küçük ekranlar için ek düzenlemeler */
+        @media screen and (max-width: 480px) {
+            .left-side {
+                padding: 10px;
+            }
+
+            .header-controls h1 {
+                font-size: 18px;
+            }
+
+            .input-wrapper {
+                padding: 6px;
+                gap: 4px;
+            }
+
+            .input-field {
+                width: calc(100% - 100px);
+                padding: 6px;
+            }
+
+            .button {
+                padding: 4px;
+                transform: scale(0.85);
+            }
+
+            .button svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .left-side {
+                width: 100%;
+                padding: 10px;
+                height: 100vh;
+            }
+
+            .header-controls {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 0;
+                margin-bottom: 8px;
+            }
+
+            .header-controls h1 {
+                font-size: 18px;
+                margin: 0;
+                padding: 0;
+                width: calc(100% - 40px);
+                line-height: 1.2;
+            }
+
+            .chat-box {
+                height: calc(100vh - 80px);
+                margin-top: 8px;
+            }
+
+            .input-wrapper {
+                padding: 8px;
+                gap: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .input-field {
+                flex: 1;
+                min-width: 0;
+                padding: 8px;
+                font-size: 14px;
+                margin-right: 4px;
+            }
+
+            .controls {
+                display: flex;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+
+            .button {
+                padding: 6px;
+                transform: scale(0.9);
+            }
+
+            .emoji-picker {
+                right: 0;
+                bottom: 100%;
+                width: 180px;
+            }
+
+            .chat-container {
+                padding: 10px;
+            }
+
+            .message {
+                max-width: 85%;
+                margin-bottom: 12px;
+            }
+
+            .message-content {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header-controls h1 {
+                font-size: 16px;
+            }
+
+            .chat-box {
+                height: calc(100vh - 70px);
+            }
+
+            .input-wrapper {
+                padding: 6px;
+            }
+
+            .input-field {
+                padding: 6px;
+                font-size: 13px;
+            }
+
+            .button {
+                padding: 4px;
+                transform: scale(0.85);
+            }
+
+            .message-content {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
