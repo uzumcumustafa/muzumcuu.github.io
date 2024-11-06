@@ -73,9 +73,10 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
-            height: calc(100% - 100px);
+            height: calc(100vh - 140px);
             margin-top: 20px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 60px;
         }
 
         [data-theme="dark"] .chat-box {
@@ -89,8 +90,8 @@
         }
 
         .chat-container {
-            flex-grow: 1;
-            padding: 20px;
+            height: 100%;
+            padding-bottom: 20px;
             overflow-y: auto;
         }
 
@@ -594,7 +595,7 @@
             }
         }
 
-        /* Çok küçük ekranlar için ek düzenlemeler */
+        /* Çok küç��k ekranlar için ek düzenlemeler */
         @media screen and (max-width: 320px) {
             .modal-content {
                 padding: 20px 15px;
@@ -987,7 +988,7 @@
                 width: auto;
                 max-width: 300px;
                 margin: auto;
-                z-index: 1000;
+                z-index: 1001;
             }
         }
 
@@ -1000,7 +1001,7 @@
                 right: 10px;
                 max-width: 250px;
                 margin: 0;
-                z-index: 1000;
+                z-index: 1001;
             }
         }
 
@@ -1062,10 +1063,24 @@
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: var(--chat-box-bg);
-                z-index: 1000;
                 padding: 8px;
+                background: var(--chat-box-bg);
                 border-top: 1px solid var(--border-color);
+                z-index: 1000;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .input-field {
+                width: calc(100% - 80px); /* Buton alanları için daha az yer ayır */
+                min-height: 36px;
+                padding: 8px 12px;
+            }
+
+            .controls {
+                display: flex;
+                gap: 4px;
+                align-items: center;
             }
         }
 
@@ -1080,6 +1095,24 @@
                 min-height: 60px;
                 max-height: calc(100vh - 160px);
             }
+        }
+
+        /* Header controls için düzeltmeler */
+        .header-controls {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--chat-bg);
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-controls h1 {
+            font-size: 18px;
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
         }
     </style>
 </head>
@@ -1521,7 +1554,7 @@
         // Pencere boyutu değiştiğinde yüksekliği tekrar ayarla
         window.addEventListener('resize', adjustChatBoxHeight);
 
-        // Sayfa yüklendiğinde başlangıç yüksekliğini ayarla
+        // Sayfa y��klendiğinde başlangıç yüksekliğini ayarla
         window.addEventListener('DOMContentLoaded', adjustChatBoxHeight);
     </script>
 
