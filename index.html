@@ -1,6 +1,6 @@
 <html lang="en"><head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Chat UI - Experimental</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -595,7 +595,7 @@
             }
         }
 
-        /* Çok küç��k ekranlar için ek düzenlemeler */
+        /* Çok küçk ekranlar için ek düzenlemeler */
         @media screen and (max-width: 320px) {
             .modal-content {
                 padding: 20px 15px;
@@ -1114,6 +1114,170 @@
             padding: 0;
             line-height: 1.2;
         }
+
+        /* Chat box ve container düzenlemeleri */
+        @media screen and (max-width: 768px) {
+            .chat-box {
+                position: fixed;
+                bottom: 60px; /* Input wrapper yüksekliği */
+                left: 0;
+                right: 0;
+                height: calc(100vh - 120px); /* Header yüksekliği ve input wrapper için alan bırak */
+                margin: 0;
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .chat-container {
+                flex: 1;
+                overflow-y: auto;
+                padding: 10px;
+                padding-bottom: 20px;
+                margin-bottom: 0;
+            }
+
+            .input-wrapper {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--chat-box-bg);
+                padding: 10px;
+                border-top: 1px solid var(--border-color);
+                z-index: 1000;
+            }
+
+            .left-side {
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header-controls {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                background: var(--chat-bg);
+                padding: 10px;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        /* Mobil görünüm için düzenlemeler */
+        @media screen and (max-width: 768px) {
+            html, body {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .left-side {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overflow: hidden;
+            }
+
+            .chat-box {
+                position: absolute;
+                top: 60px; /* Header yüksekliği */
+                left: 0;
+                right: 0;
+                bottom: 60px; /* Input wrapper yüksekliği */
+                overflow: hidden;
+            }
+
+            .chat-container {
+                height: 100%;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .input-wrapper {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--chat-bg);
+                padding: 10px;
+                border-top: 1px solid var(--border-color);
+                z-index: 1000;
+                transform: translateZ(0);
+            }
+        }
+
+        /* Viewport yüksekliğini düzeltmek için */
+        function resetViewport() {
+            // Küçük bir gecikme ile viewport'u resetle
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.style.height = window.innerHeight + 'px';
+                document.documentElement.style.height = window.innerHeight + 'px';
+            }, 50);
+        }
+
+        /* Input alanı için event listener'lar */
+        messageInput.addEventListener('focus', () => {
+            // Klavye açıldığında
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+            }, 100);
+        });
+
+        messageInput.addEventListener('blur', () => {
+            // Klavye kapandığında
+            resetViewport();
+        });
+
+        /* iOS için özel düzenleme */
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            window.addEventListener('resize', () => {
+                if (document.activeElement.tagName === 'INPUT') {
+                    window.setTimeout(() => {
+                        document.activeElement.scrollIntoViewIfNeeded();
+                    }, 100);
+                }
+            });
+        }
+
+        /* Sayfa yüklendiğinde ve yeniden boyutlandığında */
+        window.addEventListener('load', resetViewport);
+        window.addEventListener('resize', resetViewport);
+
+        /* Klavye kapandığında sayfayı düzeltmek için */
+        window.visualViewport.addEventListener('resize', () => {
+            if (window.visualViewport.height === window.innerHeight) {
+                // Klavye kapandı
+                resetViewport();
+            }
+        });
+
+        /* Input wrapper'ı viewport değişikliklerine göre ayarla */
+        function adjustInputWrapper() {
+            const inputWrapper = document.querySelector('.input-wrapper');
+            const viewportHeight = window.visualViewport.height;
+            const windowHeight = window.innerHeight;
+            
+            if (viewportHeight < windowHeight) {
+                // Klavye açık
+                inputWrapper.style.position = 'absolute';
+                inputWrapper.style.bottom = '0';
+            } else {
+                // Klavye kapalı
+                inputWrapper.style.position = 'fixed';
+                inputWrapper.style.bottom = '0';
+            }
+        }
+
+        window.visualViewport.addEventListener('resize', adjustInputWrapper);
+        window.visualViewport.addEventListener('scroll', adjustInputWrapper);
     </style>
 </head>
 <body>
@@ -1276,7 +1440,7 @@
                 typingIndicator.remove();
                 addMessage('bot', response);
                 
-                // Yanıt metninden puanı yakala
+                // Yanıt metninden puan yakala
                 const ratingMatch = response.match(/Rating:\s*(\d+\.?\d*)\/10/);
                 if (ratingMatch) {
                     const rating = parseFloat(ratingMatch[1]);
@@ -1554,8 +1718,75 @@
         // Pencere boyutu değiştiğinde yüksekliği tekrar ayarla
         window.addEventListener('resize', adjustChatBoxHeight);
 
-        // Sayfa y��klendiğinde başlangıç yüksekliğini ayarla
+        // Sayfa yüklendiğinde başlangıç yüksekliğini ayarla
         window.addEventListener('DOMContentLoaded', adjustChatBoxHeight);
+
+        /* Viewport yüksekliğini düzeltmek için */
+        function resetViewport() {
+            // Küçük bir gecikme ile viewport'u resetle
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.style.height = window.innerHeight + 'px';
+                document.documentElement.style.height = window.innerHeight + 'px';
+            }, 50);
+        }
+
+        /* Input alanı için event listener'lar */
+        messageInput.addEventListener('focus', () => {
+            // Klavye açıldığında
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+            }, 100);
+        });
+
+        messageInput.addEventListener('blur', () => {
+            // Klavye kapandığında
+            resetViewport();
+        });
+
+        /* iOS için özel düzenleme */
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            window.addEventListener('resize', () => {
+                if (document.activeElement.tagName === 'INPUT') {
+                    window.setTimeout(() => {
+                        document.activeElement.scrollIntoViewIfNeeded();
+                    }, 100);
+                }
+            });
+        }
+
+        /* Sayfa yüklendiğinde ve yeniden boyutlandığında */
+        window.addEventListener('load', resetViewport);
+        window.addEventListener('resize', resetViewport);
+
+        /* Klavye kapandığında sayfayı düzeltmek için */
+        window.visualViewport.addEventListener('resize', () => {
+            if (window.visualViewport.height === window.innerHeight) {
+                // Klavye kapandı
+                resetViewport();
+            }
+        });
+
+        /* Input wrapper'ı viewport değişikliklerine göre ayarla */
+        function adjustInputWrapper() {
+            const inputWrapper = document.querySelector('.input-wrapper');
+            const viewportHeight = window.visualViewport.height;
+            const windowHeight = window.innerHeight;
+            
+            if (viewportHeight < windowHeight) {
+                // Klavye açık
+                inputWrapper.style.position = 'absolute';
+                inputWrapper.style.bottom = '0';
+            } else {
+                // Klavye kapalı
+                inputWrapper.style.position = 'fixed';
+                inputWrapper.style.bottom = '0';
+            }
+        }
+
+        window.visualViewport.addEventListener('resize', adjustInputWrapper);
+        window.visualViewport.addEventListener('scroll', adjustInputWrapper);
     </script>
 
  </body></html>
