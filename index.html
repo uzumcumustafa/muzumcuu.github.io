@@ -74,7 +74,7 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 140px);
+            height: calc(var(--viewport-height) - 120px);
             margin-top: 20px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin-bottom: 60px;
@@ -91,9 +91,12 @@
         }
 
         .chat-container {
-            height: 100%;
-            padding-bottom: 20px;
+            height: auto;
+            max-height: calc(100% - 60px);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .message {
@@ -829,7 +832,7 @@
             }
         }
 
-        /* Daha küçük ekranlar i��in ek düzenlemeler */
+        /* Daha küçük ekranlar için ek düzenlemeler */
         @media screen and (max-width: 480px) {
             .input-wrapper {
                 padding: 6px;
@@ -1294,6 +1297,48 @@
                 font-size: 14px;
             }
         }
+
+        /* Input wrapper'ı klavye ile pozisyon sorunu */
+        .input-wrapper {
+            position: fixed;
+            bottom: 0;
+        }
+
+        /* Önerilen düzeltme */
+        .input-wrapper {
+            position: sticky;
+            bottom: 0;
+            transform: translateZ(0); /* iOS için hardware acceleration */
+            padding-bottom: env(safe-area-inset-bottom); /* iPhone X ve üzeri için */
+        }
+
+        /* Butonların dokunma alanı sorunu */
+        .button {
+            padding: 6px;
+            transform: scale(0.9);
+        }
+
+        /* Önerilen düzeltme */
+        .button {
+            padding: 12px;
+            min-width: 44px; /* Apple'ın önerdiği minimum dokunma alanı */
+            min-height: 44px;
+            transform: none;
+            touch-action: manipulation;
+        }
+
+        /* Emoji picker'ın klavye üstünde kalma sorunu */
+        .emoji-picker {
+            bottom: 100%;
+        }
+
+        /* Önerilen düzeltme */
+        .emoji-picker {
+            position: fixed;
+            bottom: var(--input-height);
+            max-height: 40vh;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -1412,7 +1457,7 @@
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
         });
 
-        const emojiList = ['😊', '😂', '🤔', '👍', '❤️', '😎', '🎉', '🔥', '👏', '🙌', '😅', '🤩'];
+        const emojiList = ['😊', '😂', '🤔', '👍', '❤️', '', '🎉', '🔥', '👏', '🙌', '😅', '🤩'];
         
         function createEmojiPicker() {
             const emojiButton = document.createElement('button');
@@ -1761,15 +1806,14 @@
         // Sayfa yüklendiğinde başlangıç yüksekliğini ayarla
         window.addEventListener('DOMContentLoaded', adjustChatBoxHeight);
 
-        /* Viewport yüksekliğini düzeltmek için */
-        function resetViewport() {
-            // Küçük bir gecikme ile viewport'u resetle
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                document.body.style.height = window.innerHeight + 'px';
-                document.documentElement.style.height = window.innerHeight + 'px';
-            }, 50);
+        /* Viewport yükseklik değişkenini tanımlama */
+        function updateViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--viewport-height', `${window.innerHeight}px`);
         }
+
+        window.addEventListener('resize', updateViewportHeight);
+        window.addEventListener('orientationchange', updateViewportHeight);
 
         /* Input alanı için event listener'lar */
         messageInput.addEventListener('focus', () => {
