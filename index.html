@@ -10,6 +10,7 @@
         :root {
             --bg-color: #f5f5f5;
             --chat-bg: white;
+        
             --text-color: #333;
             --user-message-bg: #EEF2FF;
             --bot-message-bg: #F8FAFC;
@@ -1119,22 +1120,21 @@
         @media screen and (max-width: 768px) {
             .chat-box {
                 position: fixed;
-                bottom: 60px; /* Input wrapper yüksekliği */
+                top: 60px; /* Header için alan */
                 left: 0;
                 right: 0;
-                height: calc(100vh - 120px); /* Header yüksekliği ve input wrapper için alan bırak */
+                bottom: 60px; /* Input wrapper için alan */
+                height: calc(100vh - 120px); /* Header ve input wrapper için toplam alan çıkarıldı */
                 margin: 0;
                 border-radius: 0;
-                display: flex;
-                flex-direction: column;
             }
 
             .chat-container {
-                flex: 1;
+                height: 100%;
                 overflow-y: auto;
                 padding: 10px;
                 padding-bottom: 20px;
-                margin-bottom: 0;
+                -webkit-overflow-scrolling: touch; /* iOS için smooth scroll */
             }
 
             .input-wrapper {
@@ -1150,8 +1150,8 @@
 
             .left-side {
                 padding: 0;
-                display: flex;
-                flex-direction: column;
+                height: 100%;
+                overflow: hidden;
             }
 
             .header-controls {
@@ -1212,72 +1212,6 @@
             }
         }
 
-        /* Viewport yüksekliğini düzeltmek için */
-        function resetViewport() {
-            // Küçük bir gecikme ile viewport'u resetle
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                document.body.style.height = window.innerHeight + 'px';
-                document.documentElement.style.height = window.innerHeight + 'px';
-            }, 50);
-        }
-
-        /* Input alanı için event listener'lar */
-        messageInput.addEventListener('focus', () => {
-            // Klavye açıldığında
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                document.body.scrollTop = 0;
-            }, 100);
-        });
-
-        messageInput.addEventListener('blur', () => {
-            // Klavye kapandığında
-            resetViewport();
-        });
-
-        /* iOS için özel düzenleme */
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            window.addEventListener('resize', () => {
-                if (document.activeElement.tagName === 'INPUT') {
-                    window.setTimeout(() => {
-                        document.activeElement.scrollIntoViewIfNeeded();
-                    }, 100);
-                }
-            });
-        }
-
-        /* Sayfa yüklendiğinde ve yeniden boyutlandığında */
-        window.addEventListener('load', resetViewport);
-        window.addEventListener('resize', resetViewport);
-
-        /* Klavye kapandığında sayfayı düzeltmek için */
-        window.visualViewport.addEventListener('resize', () => {
-            if (window.visualViewport.height === window.innerHeight) {
-                // Klavye kapandı
-                resetViewport();
-            }
-        });
-
-        /* Input wrapper'ı viewport değişikliklerine göre ayarla */
-        function adjustInputWrapper() {
-            const inputWrapper = document.querySelector('.input-wrapper');
-            const viewportHeight = window.visualViewport.height;
-            const windowHeight = window.innerHeight;
-            
-            if (viewportHeight < windowHeight) {
-                // Klavye açık
-                inputWrapper.style.position = 'absolute';
-                inputWrapper.style.bottom = '0';
-            } else {
-                // Klavye kapalı
-                inputWrapper.style.position = 'fixed';
-                inputWrapper.style.bottom = '0';
-            }
-        }
-
-        window.visualViewport.addEventListener('resize', adjustInputWrapper);
-        window.visualViewport.addEventListener('scroll', adjustInputWrapper);
     </style>
 </head>
 <body>
