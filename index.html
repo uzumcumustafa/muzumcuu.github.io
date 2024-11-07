@@ -74,7 +74,7 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
-            height: calc(var(--viewport-height) - 120px);
+            height: calc(100vh - 180px);
             margin-top: 20px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin-bottom: 60px;
@@ -91,12 +91,9 @@
         }
 
         .chat-container {
-            height: auto;
-            max-height: calc(100% - 60px);
+            flex: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: constant(safe-area-inset-bottom);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding: 20px;
         }
 
         .message {
@@ -165,20 +162,19 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            position: relative;
         }
 
         .input-field {
             flex: 1;
-            padding: 15px;
-            background-color: var(--input-bg);
-            color: var(--input-text);
-            border: 1px solid var(--input-border);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 15px;
-            font-weight: 400;
-            outline: none;
-            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-            transition: all 0.3s ease;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            background: var(--input-bg);
+            color: var(--text-color);
+            min-height: 45px;
         }
 
         .input-field:focus {
@@ -196,21 +192,26 @@
         }
 
         .button {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            color: #666;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--button-bg);
+            color: var(--button-color);
+            cursor: pointer;
             transition: all 0.2s ease;
-            opacity: 0.6;
         }
 
         .button:hover {
-            opacity: 1;
-            transform: scale(1.1);
+            background: var(--button-hover-bg);
+        }
+
+        .button svg {
+            width: 20px;
+            height: 20px;
         }
 
         .button.send-button {
@@ -219,11 +220,6 @@
 
         .button.clear-button {
             color: #ff4444;
-        }
-
-        .button svg {
-            width: 20px;
-            height: 20px;
         }
 
         .button.send-button svg {
@@ -477,6 +473,13 @@
                 right: 0;
                 bottom: auto;
                 margin-top: 8px;
+                max-width: calc(100vw - 40px);
+                width: 250px;
+            }
+
+            .header-controls {
+                position: relative;
+                z-index: 100;
             }
         }
 
@@ -793,42 +796,13 @@
         /* Input wrapper için mobil düzenlemeler */
         @media screen and (max-width: 768px) {
             .input-wrapper {
-                padding: 8px;
-                gap: 6px;
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: var(--chat-box-bg);
-                display: flex;
-                align-items: center;
-                width: 100%;
-                box-sizing: border-box;
+                padding: 10px;
                 z-index: 1000;
-            }
-
-            .input-field {
-                min-height: 40px;
-                padding: 8px 12px;
-                font-size: 16px;
-                flex: 1;
-                min-width: 0;
-                margin-right: 4px;
-            }
-
-            .controls {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                flex-shrink: 0;
-            }
-
-            .chat-box {
-                padding-bottom: 60px;
-            }
-
-            .chat-container {
-                padding-bottom: 70px;
+                padding-bottom: env(safe-area-inset-bottom);
             }
         }
 
@@ -1240,14 +1214,14 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            display: none;
+            display: none; /* Initially hidden */
             align-items: center;
             justify-content: center;
             z-index: 2000;
         }
 
         .info-popup.active {
-            display: flex;
+            display: flex; /* Display as flex when active */
         }
 
         .info-content {
@@ -1257,6 +1231,8 @@
             max-width: 90%;
             width: 400px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            position: relative;
+            margin: 20px;
         }
 
         .info-content h3 {
@@ -1288,13 +1264,27 @@
         }
 
         @media screen and (max-width: 768px) {
-            .info-content {
-                margin: 20px;
-                padding: 20px;
+            .info-popup {
+                align-items: center;
+                padding: 0 15px;
             }
             
+            .info-content {
+                margin: 0;
+                width: 100%;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
             .info-content p {
                 font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .close-info-button {
+                margin-top: 15px;
+                padding: 12px;
+                font-size: 16px;
             }
         }
 
@@ -1338,6 +1328,146 @@
             bottom: var(--input-height);
             max-height: 40vh;
             overflow-y: auto;
+        }
+
+        /* Mobil görünüm için ana düzenlemeler */
+        @media screen and (max-width: 768px) {
+            body {
+                position: relative; /* fixed yerine relative kullan */
+                height: 100%;
+                overflow-y: auto; /* hidden yerine auto kullan */
+            }
+
+            .left-side {
+                position: relative; /* fixed yerine relative kullan */
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            .chat-box {
+                position: relative; /* absolute yerine relative kullan */
+                height: calc(100vh - 120px);
+                margin-bottom: 60px; /* input wrapper için alan bırak */
+            }
+
+            .chat-container {
+                height: auto;
+                min-height: 200px;
+                padding-bottom: 70px; /* input wrapper için extra padding */
+            }
+
+            .input-wrapper {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--chat-bg);
+                padding: 10px;
+                border-top: 1px solid var(--border-color);
+                z-index: 1000;
+                padding-bottom: env(safe-area-inset-bottom); /* iPhone X ve üzeri için */
+            }
+        }
+
+        /* Input field için özel düzenlemeler */
+        .input-field {
+            -webkit-appearance: none; /* iOS'ta varsayılan stili kaldır */
+            appearance: none; /* Modern tarayıcılar için genel özellik */
+            font-size: 16px;
+            line-height: 1.3;
+            padding: 12px;
+        }
+
+        /* Emoji picker için düzeltmeler */
+        .emoji-picker {
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 0;
+            z-index: 1001;
+            background: var(--chat-box-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            display: none; /* Başlangıçta gizli */
+            grid-template-columns: repeat(2, 1fr); /* 2 sütunlu grid */
+            gap: 8px;
+            width: auto; /* Genişlik otomatik */
+            min-width: 100px; /* Minimum genişlik */
+        }
+
+        .emoji-button {
+            position: relative;
+            z-index: 1000;
+        }
+
+        .emoji-picker button {
+            padding: 8px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+            font-size: 20px; /* Emoji boyutu */
+        }
+
+        .emoji-picker button:hover {
+            background: var(--hover-bg);
+        }
+
+      
+
+        /* Info panel için CSS */
+        .info-button {
+            position: relative;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: var(--chat-box-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            min-width: 250px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .info-panel.active {
+            display: block;
+        }
+
+        /* Ok işareti için */
+        .info-panel::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            width: 16px;
+            height: 16px;
+            background: var(--chat-box-bg);
+            border-left: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            transform: rotate(45deg);
+        }
+
+        /* Info panel içeriği için stiller */
+        .info-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .info-panel p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-color);
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -1457,7 +1587,7 @@
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
         });
 
-        const emojiList = ['😊', '😂', '🤔', '👍', '❤️', '', '🎉', '🔥', '👏', '🙌', '😅', '🤩'];
+        const emojiList = ['😊', '😂', '🤔', '👍', '❤️', '', '🎉', '🔥', '👏', '', '😅', '🤩'];
         
         function createEmojiPicker() {
             const emojiButton = document.createElement('button');
@@ -1873,23 +2003,19 @@
         window.visualViewport.addEventListener('scroll', adjustInputWrapper);
 
         // Info button click event
-        document.getElementById('infoButton').addEventListener('click', () => {
-            document.getElementById('infoPopup').classList.add('active');
+        document.getElementById('infoButton').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            document.getElementById('infoPopup').classList.toggle('active');
         });
 
-        // Close info popup
+        // Close the popup when the close button is clicked
         document.querySelector('.close-info-button').addEventListener('click', () => {
             document.getElementById('infoPopup').classList.remove('active');
         });
 
-        // Close popup when clicking the "Got it!" button
-        document.querySelector('.close-info-button').addEventListener('click', () => {
-            document.getElementById('infoPopup').classList.remove('active');
-        });
-
-        // Close popup when clicking outside
-        document.getElementById('infoPopup').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('infoPopup')) {
+        // Close the popup when clicking outside of it
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('infoPopup').contains(e.target) && !document.getElementById('infoButton').contains(e.target)) {
                 document.getElementById('infoPopup').classList.remove('active');
             }
         });
