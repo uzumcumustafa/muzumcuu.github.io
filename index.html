@@ -829,7 +829,7 @@
             }
         }
 
-        /* Daha küçük ekranlar için ek düzenlemeler */
+        /* Daha küçük ekranlar i��in ek düzenlemeler */
         @media screen and (max-width: 480px) {
             .input-wrapper {
                 padding: 6px;
@@ -1031,7 +1031,7 @@
                 min-height: 120px; /* Başlangıç yüksekliği - tek mesaj için */
                 max-height: calc(100vh - 120px); /* Maksimum yükseklik */
                 height: auto; /* Otomatik yükseklik */
-                transition: height 0.3s ease; /* Yumuşak geçiş animasyonu */
+                transition: height 0.3s ease; /* Yumuak geçiş animasyonu */
                 margin-top: 8px;
             }
 
@@ -1212,6 +1212,88 @@
             }
         }
 
+        /* Add these styles in the existing <style> tag */
+        .info-button {
+            margin-right: 8px;
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .info-button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .info-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .info-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .info-popup.active {
+            display: flex;
+        }
+
+        .info-content {
+            background: var(--chat-bg);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+
+        .info-content h3 {
+            color: var(--text-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .info-content p {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .close-info-button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .close-info-button:hover {
+            background: #1976d2;
+        }
+
+        @media screen and (max-width: 768px) {
+            .info-content {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            .info-content p {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1228,6 +1310,15 @@
         <div class="header-controls">
             <h1>Welcome!</h1>
             <div class="settings-container">
+                <!-- Info button -->
+                <button class="button info-button" id="infoButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                </button>
+                <!-- Existing settings button -->
                 <button class="button settings-button" id="settingsButton">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
@@ -1279,6 +1370,21 @@
 
     <div class="right-side">
         <!-- Buraya resim gelecek -->
+    </div>
+
+    <div class="info-popup" id="infoPopup">
+        <div class="info-content">
+            <h3>How to Interact with Our Chatbot Boss</h3>
+            <p>
+                1. Greet the Boss: Start by saying hello to receive your topic for a time-off prompt.<br>
+                2. Write a Persuasive Prompt: Follow the given topic and craft a detailed, engaging prompt for the boss.<br>
+                3. Aim for High Quality: Include specific details, ask the chatbot to adopt a persona, or provide step-by-step instructions to increase your score.<br>
+                4. Watch Out for Feedback: The boss will rate your prompt with humor and a score. A score of 7 or higher means you get the day off!<br>
+                5. Enjoy the Interaction: Even if you don't earn the day off, the experience is sure to bring a laugh or two.<br><br>
+                Happy prompting!
+            </p>
+            <button class="close-info-button">Got it!</button>
+        </div>
     </div>
 
     <script>
@@ -1721,6 +1827,28 @@
 
         window.visualViewport.addEventListener('resize', adjustInputWrapper);
         window.visualViewport.addEventListener('scroll', adjustInputWrapper);
+
+        // Info button click event
+        document.getElementById('infoButton').addEventListener('click', () => {
+            document.getElementById('infoPopup').classList.add('active');
+        });
+
+        // Close info popup
+        document.querySelector('.close-info-button').addEventListener('click', () => {
+            document.getElementById('infoPopup').classList.remove('active');
+        });
+
+        // Close popup when clicking the "Got it!" button
+        document.querySelector('.close-info-button').addEventListener('click', () => {
+            document.getElementById('infoPopup').classList.remove('active');
+        });
+
+        // Close popup when clicking outside
+        document.getElementById('infoPopup').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('infoPopup')) {
+                document.getElementById('infoPopup').classList.remove('active');
+            }
+        });
     </script>
 
  </body></html>
