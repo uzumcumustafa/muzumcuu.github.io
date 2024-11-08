@@ -1237,6 +1237,158 @@
                 overflow-y: auto;
             }
         }
+
+        /* Mobil görünüm için özel düzenlemeler */
+        @media screen and (max-width: 768px) {
+            /* Ana yapı düzenlemeleri */
+            body {
+                flex-direction: column;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .left-side {
+                width: 100%;
+                padding: 0;
+                height: 100%;
+                background: var(--bg-color);
+            }
+
+            .right-side {
+                display: none;
+            }
+
+            /* Header düzenlemeleri */
+            .header-controls {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                padding: 0 15px;
+                background: var(--chat-bg);
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+            }
+
+            .header-controls h1 {
+                font-size: 18px;
+                margin: 0;
+                flex: 1;
+            }
+
+            /* Chat box'ı kaldırıp direkt mesajları gösterme */
+            .chat-box {
+                display: none; /* Chat box'ı gizle */
+            }
+
+            /* Yeni chat container stili */
+            .chat-container {
+                position: fixed;
+                top: 60px; /* Header yüksekliği */
+                left: 0;
+                right: 0;
+                bottom: 60px; /* Input wrapper yüksekliği */
+                padding: 15px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                background: var(--bg-color);
+            }
+
+            /* Mesaj stilleri */
+            .message {
+                max-width: 85%;
+                margin-bottom: 15px;
+            }
+
+            .message-content {
+                padding: 12px 16px;
+                border-radius: 18px;
+                font-size: 15px;
+                line-height: 1.4;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+
+            .user-message .message-content {
+                background: #2196f3;
+                color: white;
+            }
+
+            .bot-message .message-content {
+                background: var(--chat-bg);
+            }
+
+            /* Input wrapper düzenlemeleri */
+            .input-wrapper {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: auto;
+                min-height: 60px;
+                padding: 10px 15px;
+                background: var(--chat-bg);
+                box-shadow: 0 -1px 2px rgba(0,0,0,0.1);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            }
+
+            .input-field {
+                flex: 1;
+                background: var(--bg-color);
+                border: none;
+                border-radius: 20px;
+                padding: 12px 16px;
+                font-size: 16px;
+                line-height: 1.4;
+                min-height: 44px;
+                max-height: 100px;
+                resize: none;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+
+            /* Butonlar için modern stil */
+            .button {
+                width: 40px;
+                height: 40px;
+                border-radius: 20px;
+                background: var(--bg-color);
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+
+            /* Klavye açıkken düzenlemeler */
+            .keyboard-open .chat-container {
+                bottom: var(--keyboard-height, 60px);
+            }
+
+            .keyboard-open .input-wrapper {
+                position: absolute;
+                bottom: 0;
+                transform: translateY(-var(--keyboard-height, 0px));
+            }
+
+            /* Emoji picker düzenlemesi */
+            .emoji-picker {
+                position: fixed;
+                bottom: 70px;
+                left: 15px;
+                right: 15px;
+                max-width: 300px;
+                margin: auto;
+                background: var(--chat-bg);
+                border-radius: 12px;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            }
+        }
     </style>
 </head>
 <body>
