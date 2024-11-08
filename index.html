@@ -170,11 +170,18 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px 16px;
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.5;
             background: var(--input-bg);
             color: var(--text-color);
             min-height: 45px;
+            resize: none;
+            overflow-y: hidden;
+            max-height: 300px;
+            transition: height 0.1s ease-out;
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
+            letter-spacing: -0.5px;
         }
 
         .input-field:focus {
@@ -184,7 +191,9 @@
 
         .input-field::placeholder {
             color: #999;
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
             font-weight: 400;
+            letter-spacing: -0.5px;
         }
 
         [data-theme="dark"] .input-field::placeholder {
@@ -1226,14 +1235,6 @@
         <div class="header-controls">
             <h1>Welcome!</h1>
             <div class="settings-container">
-                <!-- Info button -->
-                <button class="button info-button" id="infoButton">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M12 16v-4"></path>
-                        <path d="M12 8h.01"></path>
-                    </svg>
-                </button>
                 <!-- Existing settings button -->
                 <button class="button settings-button" id="settingsButton">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1269,7 +1270,7 @@
             </div>
 
             <div class="input-wrapper">
-                <input type="text" class="input-field" placeholder="Type your message..." id="messageInput">
+                <textarea class="input-field" placeholder="Type your message..." id="messageInput" rows="1"></textarea>
                 <button class="button send-button" id="sendButton">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M22 2L15 22L11 13L2 9L22 2" stroke-linejoin="round" stroke-linecap="round"></path>
@@ -1286,21 +1287,6 @@
 
     <div class="right-side">
         <!-- Buraya resim gelecek -->
-    </div>
-
-    <div class="info-popup" id="infoPopup">
-        <div class="info-content">
-            <h3>How to Interact with Our Chatbot Boss</h3>
-            <p>
-                1. Greet the Boss: Start by saying hello to receive your topic for a time-off prompt.<br>
-                2. Write a Persuasive Prompt: Follow the given topic and craft a detailed, engaging prompt for the boss.<br>
-                3. Aim for High Quality: Include specific details, ask the chatbot to adopt a persona, or provide step-by-step instructions to increase your score.<br>
-                4. Watch Out for Feedback: The boss will rate your prompt with humor and a score. A score of 7 or higher means you get the day off!<br>
-                5. Enjoy the Interaction: Even if you don't earn the day off, the experience is sure to bring a laugh or two.<br><br>
-                Happy prompting!
-            </p>
-            <button class="close-info-button">Got it!</button>
-        </div>
     </div>
 
     <script>
@@ -1328,40 +1314,6 @@
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
         });
 
-        const emojiList = ['😊', '😂', '🤔', '👍', '❤️', '', '🎉', '🔥', '👏', '', '😅', '🤩'];
-        
-        function createEmojiPicker() {
-            const emojiButton = document.createElement('button');
-            emojiButton.className = 'button emoji-button';
-            emojiButton.innerHTML = '😊';
-
-            const emojiPicker = document.createElement('div');
-            emojiPicker.className = 'emoji-picker';
-            
-            emojiList.forEach(emoji => {
-                const emojiItem = document.createElement('div');
-                emojiItem.className = 'emoji-item';
-                emojiItem.textContent = emoji;
-                emojiItem.onclick = () => {
-                    messageInput.value += emoji;
-                    emojiPicker.classList.remove('active');
-                };
-                emojiPicker.appendChild(emojiItem);
-            });
-
-            emojiButton.onclick = (e) => {
-                e.stopPropagation();
-                emojiPicker.classList.toggle('active');
-            };
-
-            document.addEventListener('click', () => {
-                emojiPicker.classList.remove('active');
-            });
-
-            emojiButton.appendChild(emojiPicker);
-            document.querySelector('.input-wrapper').insertBefore(emojiButton, sendButton);
-        }
-
         function showTypingIndicator() {
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot-message';
@@ -1379,11 +1331,13 @@
         }
 
         async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
             if (!message) return;
 
             addMessage('user', message);
             messageInput.value = '';
+            messageInput.style.height = '45px'; // Yüksekliği sıfırla
             
             if (isSoundEnabled) {
                 messageSound.play();
@@ -1480,8 +1434,6 @@
             }
         }
 
-        createEmojiPicker();
-
         const settingsButton = document.getElementById('settingsButton');
         const settingsMenu = document.getElementById('settingsMenu');
 
@@ -1522,7 +1474,8 @@
                 icon = '🌙'; // Ay
             }
             
-            return `${greeting}, ${name}! 💚 ${icon}`;
+            // Ünlem işareti ve emojileri ekleyelim
+            return `${greeting}, ${name}! ${icon} 💚`;
         }
 
         function showNamePrompt() {
@@ -1817,6 +1770,67 @@
             if (window.innerWidth <= 768) {
                 handleKeyboard();
             }
+        });
+
+        // Info button ve popup için event listener'ları ekleyelim
+        document.addEventListener('DOMContentLoaded', () => {
+            const infoButton = document.getElementById('infoButton');
+            const infoPopup = document.getElementById('infoPopup');
+            const closeInfoButton = document.querySelector('.close-info-button');
+
+            // Info butonuna tıklandığında
+            infoButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Event'in diğer elementlere yayılmasını engelle
+                infoPopup.classList.toggle('active');
+            });
+
+            // Kapatma butonuna tıklandığında
+            closeInfoButton.addEventListener('click', () => {
+                infoPopup.classList.remove('active');
+            });
+
+            // Popup dışına tıklandığında
+            document.addEventListener('click', (e) => {
+                if (!infoPopup.contains(e.target) && !infoButton.contains(e.target)) {
+                    infoPopup.classList.remove('active');
+                }
+            });
+
+            // Mobil için dokunma olayı
+            document.addEventListener('touchstart', (e) => {
+                if (!infoPopup.contains(e.target) && !infoButton.contains(e.target)) {
+                    infoPopup.classList.remove('active');
+                }
+            });
+        });
+
+        // Textarea auto-resize fonksiyonu
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            
+            // Maksimum yüksekliği 300px'e çıkardık
+            const newHeight = Math.min(textarea.scrollHeight, 300);
+            textarea.style.height = `${newHeight}px`;
+        }
+
+        // Event listener'ları ekleyelim
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageInput = document.getElementById('messageInput');
+            
+            // Input her değiştiğinde
+            messageInput.addEventListener('input', () => {
+                autoResize(messageInput);
+            });
+            
+            // Enter tuşuna basıldığında
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Enter'ın varsayılan davranışını engelle
+                    sendMessage();
+                    // Mesaj gönderildikten sonra textarea'yı sıfırla
+                    messageInput.style.height = '45px';
+                }
+            });
         });
     </script>
 
