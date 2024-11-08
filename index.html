@@ -154,18 +154,16 @@
         }
 
         .input-wrapper {
-            padding: 12px;
-            border-top: 1px solid var(--border-color);
-            background: var(--chat-box-bg);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: fixed;
+            position: sticky;
             bottom: 0;
             left: 0;
             right: 0;
+            padding: 12px 15px;
+            background: var(--chat-bg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
             z-index: 1000;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
         }
 
         .input-field {
@@ -1168,6 +1166,8 @@
                 max-height: 100px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
                 transition: all 0.3s ease;
+                -webkit-appearance: none;
+                appearance: none;
             }
 
             .input-field:focus {
@@ -1235,24 +1235,32 @@
 
             .input-wrapper {
                 position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: var(--chat-box-bg);
-                padding: 10px;
-                border-top: 1px solid var(--border-color);
-                z-index: 1000;
-                transition: bottom 0.3s ease;
-                padding-bottom: env(safe-area-inset-bottom);
+                padding: 10px 15px;
+                background: var(--chat-bg);
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
             }
 
-            .input-wrapper.keyboard-open {
-                bottom: var(--keyboard-height);
-                padding-bottom: 10px;
+            .input-field {
+                flex: 1;
+                background: var(--bg-color);
+                border: none;
+                border-radius: 20px;
+                padding: 12px 16px;
+                font-size: 16px;
+                line-height: 1.4;
+                min-height: 44px;
+                max-height: 100px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                transition: all 0.3s ease;
+                -webkit-appearance: none;
+                appearance: none;
             }
 
-            .chat-box.keyboard-open {
-                height: calc(100vh - var(--keyboard-height) - 120px);
+            .chat-container {
+                padding-top: 70px; /* Header yüksekliği için */
+                padding-bottom: 80px; /* Input wrapper için */
+                height: calc(100vh - 60px); /* Header yüksekliği çıkarıldı */
                 overflow-y: auto;
             }
         }
@@ -1301,24 +1309,23 @@
             </div>
         </div>
         
-        <div class="chat-box">
-            <div class="chat-container" id="chatContainer">
-                <!-- Mesajlar dinamik olarak eklenecek -->
-            </div>
+        <div class="chat-container" id="chatContainer">
+            <!-- Mesajlar buraya gelecek -->
+        </div>
 
-            <div class="input-wrapper">
-                <textarea class="input-field" placeholder="Type your message..." id="messageInput" rows="1"></textarea>
-                <button class="button send-button" id="sendButton">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L15 22L11 13L2 9L22 2" stroke-linejoin="round" stroke-linecap="round"></path>
-                    </svg>
-                </button>
-                <button class="button clear-button" id="clearButton">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                </button>
-            </div>
+        <div class="input-wrapper">
+            <textarea 
+                class="input-field" 
+                placeholder="Type your message..." 
+                id="messageInput" 
+                rows="1"
+                maxlength="1000"
+            ></textarea>
+            <button class="button send-button" id="sendButton">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L15 22L11 13L2 9L22 2" stroke-linejoin="round" stroke-linecap="round"></path>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -1870,56 +1877,16 @@
             });
         });
 
-        // Input alanı için yeni event listener'lar
-        function setupInputHandlers() {
-            const messageInput = document.getElementById('messageInput');
-            const inputWrapper = document.querySelector('.input-wrapper');
-            const chatBox = document.querySelector('.chat-box');
+        // ESKİ KODLARI KALDIR
+        // function setupInputHandlers() { ... }
+        // function handleKeyboard() { ... }
 
-            // Auto-resize fonksiyonu
-            function autoResize() {
-                messageInput.style.height = '44px';
-                const newHeight = Math.min(messageInput.scrollHeight, 120);
-                messageInput.style.height = `${newHeight}px`;
-            }
-
-            messageInput.addEventListener('input', autoResize);
-
-            // Klavye olayları
-            messageInput.addEventListener('focus', () => {
-                setTimeout(() => {
-                    inputWrapper.classList.add('keyboard-open');
-                    window.scrollTo(0, document.body.scrollHeight);
-                    messageInput.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            });
-
-            messageInput.addEventListener('blur', () => {
-                inputWrapper.classList.remove('keyboard-open');
-            });
-
-            // iOS için özel düzenleme
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                window.visualViewport.addEventListener('resize', () => {
-                    if (document.activeElement === messageInput) {
-                        const keyboardHeight = window.innerHeight - window.visualViewport.height;
-                        inputWrapper.style.transform = `translateY(-${keyboardHeight}px)`;
-                    } else {
-                        inputWrapper.style.transform = 'translateY(0)';
-                    }
-                });
-            }
-        }
-
-        // Sayfa yüklendiğinde input handler'ları başlat
-        document.addEventListener('DOMContentLoaded', setupInputHandlers);
-
-        // Klavye yönetimi için yeni fonksiyon
-        function handleMobileKeyboard() {
+        // YENİ TEK BİR HANDLER FONKSİYONU
+        function initializeMobileInput() {
             const messageInput = document.getElementById('messageInput');
             const inputWrapper = document.querySelector('.input-wrapper');
             const chatContainer = document.querySelector('.chat-container');
-            
+
             // Input alanı otomatik boyutlandırma
             function autoResizeInput() {
                 messageInput.style.height = '44px';
@@ -1933,8 +1900,7 @@
             messageInput.addEventListener('focus', () => {
                 document.body.classList.add('keyboard-open');
                 setTimeout(() => {
-                    window.scrollTo(0, document.body.scrollHeight);
-                    messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
                 }, 100);
             });
 
@@ -1948,32 +1914,39 @@
                     if (document.activeElement === messageInput) {
                         const keyboardHeight = window.innerHeight - window.visualViewport.height;
                         document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
+                        
+                        if (keyboardHeight > 0) {
+                            inputWrapper.style.bottom = `${keyboardHeight}px`;
+                        } else {
+                            inputWrapper.style.bottom = '0';
+                        }
+                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 });
-
-                window.visualViewport.addEventListener('scroll', () => {
-                    if (document.activeElement === messageInput) {
-                        inputWrapper.style.transform = `translateY(-${window.visualViewport.offsetTop}px)`;
-                    }
-                });
             }
+
+            // Enter tuşu yönetimi
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
         }
 
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', () => {
-            handleMobileKeyboard();
-            
-            // Scroll to bottom butonu ekle
-            const scrollButton = document.createElement('button');
-            scrollButton.className = 'scroll-bottom-button';
-            scrollButton.innerHTML = '↓';
-            document.body.appendChild(scrollButton);
-            
-            scrollButton.addEventListener('click', () => {
-                const chatContainer = document.querySelector('.chat-container');
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            });
+            if (window.innerWidth <= 768) {
+                initializeMobileInput();
+            }
+        });
+
+        // Pencere boyutu değiştiğinde
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                initializeMobileInput();
+            }
         });
     </script>
 
