@@ -479,7 +479,7 @@
             }
         }
 
-        /* Başlık stilini düzenleyelim */
+        /* Balık stilini düzenleyelim */
         .header-controls h1 {
             display: flex;
             align-items: center;
@@ -1091,91 +1091,126 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                padding: 10px;
-                margin: 0;
+                padding: 15px;
                 background: var(--chat-bg);
-                z-index: 100;
-                border-bottom: 1px solid var(--border-color);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 60px;
             }
 
-            .header-controls h1 {
-                font-size: 18px;
+            /* Chat box kaldırıldı, mesajlar direkt ekranda */
+            .chat-box {
+                box-shadow: none;
+                border: none;
                 margin: 0;
                 padding: 0;
-                width: calc(100% - 40px);
-                line-height: 1.2;
-            }
-
-            /* Chat box düzenlemeleri */
-            .chat-box {
-                height: calc(100vh - 120px);
-                margin: 0;
-                padding-top: 50px; /* Header için boşluk */
-                border-radius: 0;
+                height: auto;
+                background: transparent;
             }
 
             .chat-container {
-                padding: 10px;
-                padding-bottom: 60px;
+                padding: 75px 15px 90px;
+                height: auto;
+                background: var(--bg-color);
             }
 
-            /* Mesaj düzenlemeleri */
+            /* Mesaj stilleri güncellendi */
             .message {
                 max-width: 85%;
-                margin-bottom: 12px;
+                margin-bottom: 15px;
             }
 
             .message-content {
-                padding: 8px 12px;
-                font-size: 14px;
+                padding: 12px 16px;
+                border-radius: 18px;
+                font-size: 15px;
+                line-height: 1.4;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
 
-            /* Input alan düzenlemeleri */
+            .user-message .message-content {
+                background: #2196f3;
+                color: white;
+            }
+
+            .bot-message .message-content {
+                background: var(--chat-bg);
+            }
+
+            /* Modern input alanı */
             .input-wrapper {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                padding: 8px;
-                background: var(--chat-box-bg);
-                border-top: 1px solid var(--border-color);
+                padding: 10px 15px;
+                background: var(--chat-bg);
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
                 z-index: 1000;
-                padding-bottom: env(safe-area-inset-bottom);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
             }
 
             .input-field {
-                padding: 8px;
-                font-size: 14px;
-                min-height: 36px;
+                flex: 1;
+                background: var(--bg-color);
+                border: none;
+                border-radius: 20px;
+                padding: 12px 16px;
+                font-size: 16px;
+                line-height: 1.4;
+                min-height: 44px;
+                max-height: 100px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                transition: all 0.3s ease;
             }
 
+            .input-field:focus {
+                outline: none;
+                box-shadow: 0 2px 10px rgba(33, 150, 243, 0.2);
+            }
+
+            /* Modern butonlar */
             .button {
-                padding: 8px;
-                min-width: 36px;
-                min-height: 36px;
+                width: 40px;
+                height: 40px;
+                border-radius: 20px;
+                background: #2196f3;
+                border: none;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
             }
 
-            /* Emoji picker düzenlemesi */
-            .emoji-picker {
-                position: fixed;
-                bottom: 60px;
-                left: 10px;
-                right: 10px;
-                width: auto;
-                max-width: 300px;
-                margin: auto;
-                z-index: 1001;
+            .button:active {
+                transform: scale(0.95);
             }
 
-            /* Settings menü düzenlemesi */
-            .settings-menu {
+            .button svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .clear-button {
+                background: #ff4444;
+            }
+
+            /* Klavye açıkken düzenlemeler */
+            .keyboard-open .input-wrapper {
                 position: fixed;
-                top: auto;
-                bottom: 70px;
-                right: 10px;
-                max-width: 250px;
-                margin: 0;
-                z-index: 1001;
+                bottom: 0;
+                transform: translateY(0);
+            }
+
+            .keyboard-open .chat-container {
+                padding-bottom: 120px;
             }
         }
 
@@ -1878,6 +1913,68 @@
 
         // Sayfa yüklendiğinde input handler'ları başlat
         document.addEventListener('DOMContentLoaded', setupInputHandlers);
+
+        // Klavye yönetimi için yeni fonksiyon
+        function handleMobileKeyboard() {
+            const messageInput = document.getElementById('messageInput');
+            const inputWrapper = document.querySelector('.input-wrapper');
+            const chatContainer = document.querySelector('.chat-container');
+            
+            // Input alanı otomatik boyutlandırma
+            function autoResizeInput() {
+                messageInput.style.height = '44px';
+                const newHeight = Math.min(messageInput.scrollHeight, 100);
+                messageInput.style.height = `${newHeight}px`;
+            }
+
+            messageInput.addEventListener('input', autoResizeInput);
+
+            // Klavye olayları
+            messageInput.addEventListener('focus', () => {
+                document.body.classList.add('keyboard-open');
+                setTimeout(() => {
+                    window.scrollTo(0, document.body.scrollHeight);
+                    messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+            });
+
+            messageInput.addEventListener('blur', () => {
+                document.body.classList.remove('keyboard-open');
+            });
+
+            // iOS için viewport yönetimi
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (document.activeElement === messageInput) {
+                        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                        document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                });
+
+                window.visualViewport.addEventListener('scroll', () => {
+                    if (document.activeElement === messageInput) {
+                        inputWrapper.style.transform = `translateY(-${window.visualViewport.offsetTop}px)`;
+                    }
+                });
+            }
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            handleMobileKeyboard();
+            
+            // Scroll to bottom butonu ekle
+            const scrollButton = document.createElement('button');
+            scrollButton.className = 'scroll-bottom-button';
+            scrollButton.innerHTML = '↓';
+            document.body.appendChild(scrollButton);
+            
+            scrollButton.addEventListener('click', () => {
+                const chatContainer = document.querySelector('.chat-container');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        });
     </script>
 
  </body></html>
