@@ -154,34 +154,36 @@
         }
 
         .input-wrapper {
-            padding: 20px;
+            padding: 12px;
             border-top: 1px solid var(--border-color);
             background: var(--chat-box-bg);
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
             display: flex;
             align-items: center;
             gap: 12px;
-            position: relative;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
         }
 
         .input-field {
             flex: 1;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 12px;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.4;
             background: var(--input-bg);
             color: var(--text-color);
-            min-height: 45px;
+            min-height: 44px;
+            max-height: 120px;
             resize: none;
-            overflow-y: hidden;
-            max-height: 300px;
-            transition: height 0.1s ease-out;
-            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-            font-weight: 400;
-            letter-spacing: -0.5px;
+            overflow-y: auto;
+            -webkit-appearance: none;
+            appearance: none;
+            z-index: 1001;
         }
 
         .input-field:focus {
@@ -1128,7 +1130,7 @@
                 font-size: 14px;
             }
 
-            /* Input alanı düzenlemeleri */
+            /* Input alan düzenlemeleri */
             .input-wrapper {
                 position: fixed;
                 bottom: 0;
@@ -1832,6 +1834,50 @@
                 }
             });
         });
+
+        // Input alanı için yeni event listener'lar
+        function setupInputHandlers() {
+            const messageInput = document.getElementById('messageInput');
+            const inputWrapper = document.querySelector('.input-wrapper');
+            const chatBox = document.querySelector('.chat-box');
+
+            // Auto-resize fonksiyonu
+            function autoResize() {
+                messageInput.style.height = '44px';
+                const newHeight = Math.min(messageInput.scrollHeight, 120);
+                messageInput.style.height = `${newHeight}px`;
+            }
+
+            messageInput.addEventListener('input', autoResize);
+
+            // Klavye olayları
+            messageInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    inputWrapper.classList.add('keyboard-open');
+                    window.scrollTo(0, document.body.scrollHeight);
+                    messageInput.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            });
+
+            messageInput.addEventListener('blur', () => {
+                inputWrapper.classList.remove('keyboard-open');
+            });
+
+            // iOS için özel düzenleme
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (document.activeElement === messageInput) {
+                        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                        inputWrapper.style.transform = `translateY(-${keyboardHeight}px)`;
+                    } else {
+                        inputWrapper.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+        }
+
+        // Sayfa yüklendiğinde input handler'ları başlat
+        document.addEventListener('DOMContentLoaded', setupInputHandlers);
     </script>
 
  </body></html>
