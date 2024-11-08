@@ -1182,6 +1182,34 @@
                 bottom: var(--keyboard-height, 0px);
             }
         }
+
+        /* Mobil görünüm için tüm düzenlemeler */
+        @media screen and (max-width: 768px) {
+            /* ... diğer stiller ... */
+
+            .input-wrapper {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--chat-box-bg);
+                padding: 10px;
+                border-top: 1px solid var(--border-color);
+                z-index: 1000;
+                transition: bottom 0.3s ease;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            .input-wrapper.keyboard-open {
+                bottom: var(--keyboard-height);
+                padding-bottom: 10px;
+            }
+
+            .chat-box.keyboard-open {
+                height: calc(100vh - var(--keyboard-height) - 120px);
+                overflow-y: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1737,23 +1765,45 @@
         function handleKeyboard() {
             const chatBox = document.querySelector('.chat-box');
             const inputWrapper = document.querySelector('.input-wrapper');
+            const messageInput = document.querySelector('.input-field');
             
+            // iOS için viewport yüksekliğini takip et
+            window.visualViewport.addEventListener('resize', () => {
+                if (document.activeElement === messageInput) {
+                    const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                    document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
+                    
+                    if (keyboardHeight > 0) {
+                        inputWrapper.classList.add('keyboard-open');
+                        chatBox.classList.add('keyboard-open');
+                        // Input alanına scroll
+                        setTimeout(() => {
+                            messageInput.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    } else {
+                        inputWrapper.classList.remove('keyboard-open');
+                        chatBox.classList.remove('keyboard-open');
+                    }
+                }
+            });
+
             messageInput.addEventListener('focus', () => {
-                // Klavye açıldığında
                 setTimeout(() => {
                     const keyboardHeight = window.innerHeight - window.visualViewport.height;
                     document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
-                    chatBox.classList.add('keyboard-open');
                     inputWrapper.classList.add('keyboard-open');
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    chatBox.classList.add('keyboard-open');
+                    // Input alanına scroll
+                    messageInput.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
             });
 
             messageInput.addEventListener('blur', () => {
-                // Klavye kapandığında
-                chatBox.classList.remove('keyboard-open');
-                inputWrapper.classList.remove('keyboard-open');
-                document.documentElement.style.setProperty('--keyboard-height', '0px');
+                setTimeout(() => {
+                    inputWrapper.classList.remove('keyboard-open');
+                    chatBox.classList.remove('keyboard-open');
+                    document.documentElement.style.setProperty('--keyboard-height', '0px');
+                }, 100);
             });
         }
 
