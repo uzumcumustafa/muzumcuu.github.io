@@ -95,13 +95,10 @@
         }
 
         .chat-container {
-    flex: 1;
+    height: calc(100vh - var(--header-height) - var(--input-height));
     overflow-y: auto;
-    padding: 15px;
-    height: auto;
-    max-height: calc(100vh - 120px);
-    -webkit-overflow-scrolling: touch; /* iOS için smooth scroll */
-    padding-bottom: 70px; /* input wrapper için boşluk */
+    padding-bottom: 70px;
+    -webkit-overflow-scrolling: touch;
 }
 
 
@@ -163,16 +160,41 @@
         }
 
         .input-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--chat-bg);
     padding: 10px;
     border-top: 1px solid var(--border-color);
-    background: var(--chat-box-bg);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
     display: flex;
     align-items: center;
     gap: 8px;
-    position: sticky;
-    bottom: 0;
-    z-index: 1000;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* iOS için özel düzenleme */
+@supports (-webkit-touch-callout: none) {
+    .input-wrapper {
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+}
+
+/* Mobil için düzenlemeler */
+@media screen and (max-width: 768px) {
+    html, body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .chat-container {
+        height: calc(var(--viewport-height) - var(--header-height) - var(--input-height));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
         .input-field {
@@ -1206,14 +1228,10 @@
                 height: 100%;
                 overflow: hidden;
             }
-
+            
             .left-side {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                overflow: hidden;
+                height: 100%;
+                overflow-y: auto;
             }
 
             .chat-box {
@@ -1632,6 +1650,81 @@
     </div>
 
     <script>
+const viewportManager = {
+    init() {
+        this.updateViewportHeight();
+        this.addEventListeners();
+    },
+
+    updateViewportHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    },
+
+    handleKeyboard() {
+        if (window.innerWidth <= 768) {
+            const keyboardHeight = window.innerHeight - window.visualViewport.height;
+            this.adjustLayout(keyboardHeight);
+        }
+    },
+
+    adjustLayout(keyboardHeight) {
+        const inputWrapper = document.querySelector('.input-wrapper');
+        const chatContainer = document.querySelector('.chat-container');
+        
+        if (keyboardHeight > 0) {
+            inputWrapper.style.position = 'absolute';
+            inputWrapper.style.bottom = `${keyboardHeight}px`;
+            chatContainer.style.paddingBottom = `${keyboardHeight + 70}px`;
+        } else {
+            inputWrapper.style.position = 'fixed';
+            inputWrapper.style.bottom = '0';
+            chatContainer.style.paddingBottom = '70px';
+        }
+    },
+
+    addEventListeners() {
+        window.addEventListener('resize', () => this.updateViewportHeight());
+        window.addEventListener('orientationchange', () => this.updateViewportHeight());
+        window.visualViewport.addEventListener('resize', () => this.handleKeyboard());
+    }
+};
+
+const iOSManager = {
+    init() {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            this.addIOSListeners();
+        }
+    },
+
+    addIOSListeners() {
+        const messageInput = document.querySelector('.input-field');
+        
+        ['focus', 'blur'].forEach(event => {
+            messageInput.addEventListener(event, () => {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                }, 100);
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (document.activeElement.tagName === 'INPUT') {
+                window.setTimeout(() => {
+                    document.activeElement.scrollIntoViewIfNeeded();
+                }, 100);
+            }
+        });
+    }
+};
+
+// Sayfa yüklendiğinde her iki manager'ı da başlat
+document.addEventListener('DOMContentLoaded', () => {
+    viewportManager.init();
+    iOSManager.init();
+});
+   
         const chatContainer = document.getElementById('chatContainer');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
@@ -2025,19 +2118,10 @@ window.visualViewport.addEventListener('resize', () => {
 });
 
 // Event listener'ları ekle
-window.addEventListener('resize', updateViewportHeight);
-window.addEventListener('orientationchange', updateViewportHeight);
+
 document.addEventListener('DOMContentLoaded', updateViewportHeight);
 
-// iOS için özel düzenleme
-if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-    messageInput.addEventListener('focus', () => {
-        setTimeout(() => {
-            window.scrollTo(0, 0);
-            document.body.scrollTop = 0;
-        }, 100);
-    });
-}
+
         
 
         // Chat kutusu yüksekliğini ayarlama fonksiyonu
@@ -2098,19 +2182,7 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         window.addEventListener('load', resetViewport);
         window.addEventListener('resize', resetViewport);
 
-        /* Klavye kapandığında sayfayı düzeltmek için */
-        window.visualViewport.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                const viewportHeight = window.visualViewport.height;
-                document.documentElement.style.height = `${viewportHeight}px`;
-                document.body.style.height = `${viewportHeight}px`;
-                
-                // Input wrapper pozisyonunu ayarla
-                const inputWrapper = document.querySelector('.input-wrapper');
-                const bottomPosition = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
-                inputWrapper.style.bottom = `${bottomPosition}px`;
-            }
-        });
+        
 
         /* Input wrapper'ı viewport değişikliklerine göre ayarla */
         function adjustInputWrapper() {
@@ -2132,28 +2204,47 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         window.visualViewport.addEventListener('resize', adjustInputWrapper);
         window.visualViewport.addEventListener('scroll', adjustInputWrapper);
 
-        // Info button click event
-        document.getElementById('infoButton').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const popup = document.getElementById('infoPopup');
-            popup.classList.add('active');
-        });
+        const eventManager = {
+    handlers: {
+        click: {
+            sendButton: sendMessage,
+            clearButton: () => chatContainer.innerHTML = '',
+            infoButton: (e) => {
+                e.stopPropagation();
+                document.getElementById('infoPopup').classList.add('active');
+            },
+            'close-info-button': () => {
+                document.getElementById('infoPopup').classList.remove('active');
+            }
+        }
+    },
 
-        // Close the popup when the close button is clicked
-        document.querySelector('.close-info-button').addEventListener('click', () => {
-            const popup = document.getElementById('infoPopup');
-            popup.classList.remove('active');
-        });
+    init() {
+        this.addGlobalListeners();
+    },
 
-        // Close the popup when clicking outside of it
+    addGlobalListeners() {
+        // Click olaylarını yönet
         document.addEventListener('click', (e) => {
+            const handler = this.handlers.click[e.target.id];
+            if (handler) handler(e);
+
+            // Popup dışı tıklamaları kontrol et
             const popup = document.getElementById('infoPopup');
             const infoButton = document.getElementById('infoButton');
-            if (!popup.contains(e.target) && !infoButton.contains(e.target)) {
+            if (popup && !popup.contains(e.target) && !infoButton.contains(e.target)) {
                 popup.classList.remove('active');
             }
         });
+    }
+};
 
+// DOMContentLoaded event listener'ını güncelle
+document.addEventListener('DOMContentLoaded', () => {
+    viewportManager.init();
+    iOSManager.init();
+    eventManager.init();
+});
 
         // Önerilen düzeltme
         window.visualViewport.addEventListener('resize', () => {
@@ -2182,6 +2273,14 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             const handler = eventHandlers.click[e.target.id];
             if (handler) handler(e);
         });
+
+      
+       
+
+        // Sayfa yüklendiğinde fonksiyonu çağır
+        document.addEventListener('DOMContentLoaded', handleKeyboard);
+
+        
     </script>
 
  </body></html>
