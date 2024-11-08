@@ -820,80 +820,42 @@
                 padding: 6px;
                 transform: scale(0.9);
             }
-        }
 
-        @media screen and (max-width: 768px) {
-            .left-side {
-                width: 100%;
-                padding: 10px;
-                height: 100vh;
-            }
-
-            .header-controls {
-                flex-wrap: wrap;
-                gap: 8px;
-                padding: 0;
-                margin-bottom: 8px;
-            }
-
-            .header-controls h1 {
-                font-size: 18px;
-                margin: 0;
-                padding: 0;
-                width: calc(100% - 40px);
-                line-height: 1.2;
-            }
-
-            .chat-box {
-                height: calc(100vh - 80px);
-                margin-top: 8px;
-            }
-
-            .input-wrapper {
-                padding: 8px;
-                gap: 4px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .input-field {
-                flex: 1;
-                min-width: 0;
-                padding: 8px;
-                font-size: 14px;
-                margin-right: 4px;
-            }
-
-            .controls {
-                display: flex;
-                gap: 4px;
-                flex-shrink: 0;
-            }
-
-            .button {
-                padding: 6px;
-                transform: scale(0.9);
+            .button svg {
+                width: 18px;
+                height: 18px;
             }
 
             .emoji-picker {
-                right: 0;
-                bottom: 100%;
-                width: 180px;
+                width: 200px;
+                right: -10px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .header-controls {
+                margin-bottom: 10px;
             }
 
-            .chat-container {
-                padding: 10px;
+            .settings-menu {
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                margin-top: 0;
             }
 
-            .message {
-                max-width: 85%;
-                margin-bottom: 12px;
+            /* Ensure buttons are visible without horizontal scroll */
+            .input-wrapper {
+                flex-wrap: nowrap;
+                justify-content: space-between;
             }
 
-            .message-content {
-                padding: 8px 12px;
-                font-size: 14px;
+            /* Make input field slightly smaller to accommodate buttons */
+            .input-field {
+                width: calc(100% - 120px);
             }
         }
 
@@ -1214,14 +1176,14 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            display: none; /* Initially hidden */
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
         }
 
         .info-popup.active {
-            display: flex; /* Display as flex when active */
+            display: flex;
         }
 
         .info-content {
@@ -1233,6 +1195,7 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
             position: relative;
             margin: 20px;
+            z-index: 2001;
         }
 
         .info-content h3 {
@@ -1325,9 +1288,11 @@
         /* Önerilen düzeltme */
         .emoji-picker {
             position: fixed;
-            bottom: var(--input-height);
+            bottom: var(--input-height, 60px);
+            left: 10px;
             max-height: 40vh;
             overflow-y: auto;
+            z-index: 1002;
         }
 
         /* Mobil görünüm için ana düzenlemeler */
@@ -1469,6 +1434,8 @@
             color: var(--text-color);
             line-height: 1.5;
         }
+
+      
     </style>
 </head>
 <body>
@@ -1708,6 +1675,12 @@
             chatContainer.appendChild(messageDiv);
             adjustChatBoxHeight();
             chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Smooth scroll ekleyelim
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
         }
 
         // Event Listeners
@@ -1840,8 +1813,10 @@
             document.body.appendChild(celebration);
 
             // 20 balon oluştur
+            const timeouts = [];
+            
             for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
+                const timeout = setTimeout(() => {
                     const balloon = document.createElement('div');
                     balloon.className = 'balloon';
                     balloon.style.background = colors[Math.floor(Math.random() * colors.length)];
@@ -1854,10 +1829,13 @@
                     // Animasyon bitince balonu kaldır
                     setTimeout(() => balloon.remove(), 4000);
                 }, i * 100);
+                timeouts.push(timeout);
             }
 
-            // Tüm balonları temizle
-            setTimeout(() => celebration.remove(), 6000);
+            // Cleanup
+            return () => {
+                timeouts.forEach(clearTimeout);
+            };
         }
 
         function showMotivationMessage(rating) {
@@ -1976,9 +1954,15 @@
 
         /* Klavye kapandığında sayfayı düzeltmek için */
         window.visualViewport.addEventListener('resize', () => {
-            if (window.visualViewport.height === window.innerHeight) {
-                // Klavye kapandı
-                resetViewport();
+            if (window.innerWidth <= 768) {
+                const viewportHeight = window.visualViewport.height;
+                document.documentElement.style.height = `${viewportHeight}px`;
+                document.body.style.height = `${viewportHeight}px`;
+                
+                // Input wrapper pozisyonunu ayarla
+                const inputWrapper = document.querySelector('.input-wrapper');
+                const bottomPosition = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
+                inputWrapper.style.bottom = `${bottomPosition}px`;
             }
         });
 
@@ -2004,20 +1988,53 @@
 
         // Info button click event
         document.getElementById('infoButton').addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
-            document.getElementById('infoPopup').classList.toggle('active');
+            e.stopPropagation();
+            const popup = document.getElementById('infoPopup');
+            popup.classList.add('active');
         });
 
         // Close the popup when the close button is clicked
         document.querySelector('.close-info-button').addEventListener('click', () => {
-            document.getElementById('infoPopup').classList.remove('active');
+            const popup = document.getElementById('infoPopup');
+            popup.classList.remove('active');
         });
 
         // Close the popup when clicking outside of it
         document.addEventListener('click', (e) => {
-            if (!document.getElementById('infoPopup').contains(e.target) && !document.getElementById('infoButton').contains(e.target)) {
-                document.getElementById('infoPopup').classList.remove('active');
+            const popup = document.getElementById('infoPopup');
+            const infoButton = document.getElementById('infoButton');
+            if (!popup.contains(e.target) && !infoButton.contains(e.target)) {
+                popup.classList.remove('active');
             }
+        });
+
+
+        // Önerilen düzeltme
+        window.visualViewport.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                const viewportHeight = window.visualViewport.height;
+                document.documentElement.style.height = `${viewportHeight}px`;
+                document.body.style.height = `${viewportHeight}px`;
+                
+                // Input wrapper pozisyonunu ayarla
+                const inputWrapper = document.querySelector('.input-wrapper');
+                const bottomPosition = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
+                inputWrapper.style.bottom = `${bottomPosition}px`;
+            }
+        });
+
+        // Tek bir event listener ile yönetim
+        const eventHandlers = {
+            'click': {
+                'sendButton': sendMessage,
+                'clearButton': () => { chatContainer.innerHTML = ''; },
+                // ... diğer click handlers
+            }
+        };
+
+        document.addEventListener('click', (e) => {
+            const handler = eventHandlers.click[e.target.id];
+            if (handler) handler(e);
         });
     </script>
 
