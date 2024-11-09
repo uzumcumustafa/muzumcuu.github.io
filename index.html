@@ -457,29 +457,7 @@
 
        
 
-        /* Çok küçk ekranlar için ek düzenlemeler */
-        @media screen and (max-width: 320px) {
-            .modal-content {
-                padding: 20px 15px;
-            }
-
-            .modal-content h2 {
-                font-size: 18px;
-            }
-
-            .name-input {
-                padding: 8px;
-                margin-bottom: 15px;
-            }
-        }
-
-        /* Klavye açıldığında modal pozisyonu için düzenleme */
-        @media screen and (max-height: 500px) {
-            .welcome-modal {
-                align-items: flex-start;
-                padding-top: 20px;
-            }
-        }
+       
 
         /* Başlık stilini düzenleyelim */
         .header-controls h1 {
@@ -491,11 +469,7 @@
         }
 
 
-        @media screen and (max-width: 480px) {
-            .header-controls h1 {
-                font-size: 20px;
-            }
-        }
+       
 
         /* Mevcut CSS'in sonuna eklenecek */
 
@@ -669,7 +643,7 @@
 
             .left-side {
                 width: 100%;
-                height: 100%;
+                height: 100vh;
                 padding: 0;
                 display: flex;
                 flex-direction: column;
@@ -702,6 +676,7 @@
                 overflow-y: auto;
                 padding: 10px;
                 padding-bottom: 70px;
+                padding-top: 60px;
                 -webkit-overflow-scrolling: touch;
             }
 
@@ -953,7 +928,7 @@
             messageDiv.appendChild(contentDiv);
             
             chatContainer.appendChild(messageDiv);
-            adjustChatBoxHeight();
+            
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
@@ -1163,18 +1138,6 @@
             }
         });
 
-        // Chat kutusu yüksekliğini ayarlama fonksiyonu
-        function adjustChatBoxHeight() {
-            if (window.innerWidth <= 768) {
-                const chatBox = document.querySelector('.chat-box');
-                const totalHeight = chatContainer.scrollHeight;
-                const maxHeight = window.innerHeight - 120; // maksimum yükseklik
-                
-                // Yüksekliği kademeli olarak artır
-                const newHeight = Math.min(totalHeight + 70, maxHeight); // 70px input wrapper için
-                chatBox.style.height = `${newHeight}px`;
-            }
-        }
 
         // Pencere boyutu değiştiğinde yüksekliği tekrar ayarla
         window.addEventListener('resize', adjustChatBoxHeight);
