@@ -180,9 +180,9 @@
             background: var(--input-bg);
             color: var(--text-color);
             min-height: 44px;
-            max-height: 120px;
+            max-height: 40vh;
             resize: none;
-            overflow-y: auto;
+            overflow-y: hidden;
             -webkit-appearance: none;
             appearance: none;
             z-index: 1001;
@@ -691,7 +691,7 @@
                 border-top: 1px solid var(--border-color);
                 z-index: 1000;
                 display: flex;
-                align-items: center;
+                align-items: flex-end;
                 gap: 8px;
                 padding-bottom: calc(10px + env(safe-area-inset-bottom));
                 box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -815,376 +815,343 @@
         <!-- Buraya resim gelecek -->
     </div>
 
-    <script>
-        
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const clearButton = document.getElementById('clearButton');
+  
+     <script>
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const clearButton = document.getElementById('clearButton');
 
-        const themeButton = document.getElementById('themeButton');
-        const soundButton = document.getElementById('soundButton');
-        let isSoundEnabled = true;
-        
-        const messageSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
-        messageSound.volume = 0.5;
+    const themeButton = document.getElementById('themeButton');
+    const soundButton = document.getElementById('soundButton');
+    let isSoundEnabled = true;
 
-        themeButton.addEventListener('click', () => {
-            document.documentElement.setAttribute('data-theme', 
-                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-        });
+    const messageSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+    messageSound.volume = 0.5;
 
-        soundButton.addEventListener('click', () => {
-            isSoundEnabled = !isSoundEnabled;
-            soundButton.innerHTML = isSoundEnabled ? 
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>' : 
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
-        });
+    themeButton.addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', 
+            document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
 
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot-message';
-            typingDiv.innerHTML = `
-                <div class="message-icon"><div class="ai-text">AI</div></div>
-                <div class="typing-indicator">
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                </div>
-            `;
-            chatContainer.appendChild(typingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return typingDiv;
+    soundButton.addEventListener('click', () => {
+        isSoundEnabled = !isSoundEnabled;
+        soundButton.innerHTML = isSoundEnabled ? 
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>' : 
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+    });
+
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message bot-message';
+        typingDiv.innerHTML = `
+            <div class="message-icon"><div class="ai-text">AI</div></div>
+            <div class="typing-indicator">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        `;
+        chatContainer.appendChild(typingDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return typingDiv;
+    }
+
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        addMessage('user', message);
+        messageInput.value = '';
+        messageInput.style.height = 'auto'; // Yüksekliği sıfırla
+        autoResize(messageInput); // Yüksekliği güncelle
+
+        if (isSoundEnabled) {
+            messageSound.play();
         }
 
-        async function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            if (!message) return;
+        const typingIndicator = showTypingIndicator();
 
-            addMessage('user', message);
-            messageInput.value = '';
-            messageInput.style.height = '45px'; // Yüksekliği sıfırla
+        try {
+            const response = await testBackend(message);
+            typingIndicator.remove();
+            addMessage('bot', response);
             
+            // Yanıt metninden puan yakala
+            const ratingMatch = response.match(/Rating:\s*(\d+\.?\d*)\/10/);
+            if (ratingMatch) {
+                const rating = parseFloat(ratingMatch[1]);
+                
+                // Biraz gecikme ekleyerek animasyonun mesajdan sonra gelmesini sağla
+                setTimeout(() => {
+                    if (rating >= 7) {
+                        createCelebration();
+                    } else {
+                        showMotivationMessage(Math.floor(rating));
+                    }
+                }, 500);
+            }
+
             if (isSoundEnabled) {
                 messageSound.play();
             }
-
-            const typingIndicator = showTypingIndicator();
-
-            try {
-                const response = await testBackend(message);
-                typingIndicator.remove();
-                addMessage('bot', response);
-                
-                // Yanıt metninden puan yakala
-                const ratingMatch = response.match(/Rating:\s*(\d+\.?\d*)\/10/);
-                if (ratingMatch) {
-                    const rating = parseFloat(ratingMatch[1]);
-                    
-                    // Biraz gecikme ekleyerek animasyonun mesajdan sonra gelmesini sağla
-                    setTimeout(() => {
-                        if (rating >= 7) {
-                            createCelebration();
-                        } else {
-                            showMotivationMessage(Math.floor(rating));
-                        }
-                    }, 500);
-                }
-
-                if (isSoundEnabled) {
-                    messageSound.play();
-                }
-            } catch (error) {
-                typingIndicator.remove();
-                console.error('Error:', error);
-                addMessage('bot', 'An error occurred');
-            }
+        } catch (error) {
+            typingIndicator.remove();
+            console.error('Error:', error);
+            addMessage('bot', 'An error occurred');
         }
+    }
 
-        function addMessage(type, text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', `${type}-message`);
+    function addMessage(type, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', `${type}-message`);
 
-            const iconDiv = document.createElement('div');
-            iconDiv.classList.add('message-icon');
-            
-            // Kullanıcı ikonu aynı kalıyor
-            const userIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>`;
-            
-            // Modern AI ikonu
-            const botIcon = `<div class="ai-text">AI</div>`;
+        const iconDiv = document.createElement('div');
+        iconDiv.classList.add('message-icon');
+        
+        // Kullanıcı ikonu aynı kalıyor
+        const userIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>`;
+        
+        // Modern AI ikonu
+        const botIcon = `<div class="ai-text">AI</div>`;
 
-            iconDiv.innerHTML = type === 'user' ? userIcon : botIcon;
+        iconDiv.innerHTML = type === 'user' ? userIcon : botIcon;
 
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('message-content');
-            contentDiv.textContent = text;
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+        contentDiv.textContent = text;
 
-            messageDiv.appendChild(iconDiv);
-            messageDiv.appendChild(contentDiv);
-            
-            chatContainer.appendChild(messageDiv);
-            
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Event Listeners
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-        clearButton.addEventListener('click', () => {
-            chatContainer.innerHTML = '';
-        });
-
-        async function testBackend(message) {
-            try {
-                const res = await fetch('https://chat-backend-cqm9.onrender.com/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'omit',
-                    body: JSON.stringify({ message })
-                });
-                
-                const data = await res.json();
-                return data.response;
-            } catch (error) {
-                console.error('Error:', error);
-                return 'An error occurred';
-            }
-        }
-
-        const settingsButton = document.getElementById('settingsButton');
-        const settingsMenu = document.getElementById('settingsMenu');
-
-        // Settings menüsü kontrolü
-        settingsButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            settingsMenu.classList.toggle('active');
-        });
-
-        // Sayfa herhangi bir yerine tıklandığında menüyü kapat
-        document.addEventListener('click', (e) => {
-            if (!settingsMenu.contains(e.target)) {
-                settingsMenu.classList.remove('active');
-            }
-        });
-
-        // Mobil için dokunma olayı
-        document.addEventListener('touchstart', (e) => {
-            if (!settingsMenu.contains(e.target) && !settingsButton.contains(e.target)) {
-                settingsMenu.classList.remove('active');
-            }
-        });
-
-        // Selamlama ve modal işlemleri için fonksiyonlar
-        function getGreeting(name) {
-            const hour = new Date().getHours();
-            let greeting;
-            let icon;
-            
-            if (hour >= 5 && hour < 12) {
-                greeting = 'Good morning';
-                icon = '☀️'; // Güneş
-            } else if (hour >= 12 && hour < 18) {
-                greeting = 'Good afternoon';
-                icon = '🌤️'; // Güneşli bulut
-            } else {
-                greeting = 'Good evening';
-                icon = '🌙'; // Ay
-            }
-            
-            // Ünlem işareti ve emojileri ekleyelim
-            return `${greeting}, ${name}! ${icon} 💚`;
-        }
-
-        function showNamePrompt() {
-            const modal = document.getElementById('welcomeModal');
-            const nameInput = document.getElementById('nameInput');
-            const startButton = document.getElementById('startButton');
-            
-            modal.classList.add('active');
-            nameInput.focus();
-
-            // Input validation
-            nameInput.addEventListener('input', () => {
-                const name = nameInput.value.trim();
-                startButton.disabled = name.length < 2;
-            });
-
-            // Handle start button click
-            startButton.addEventListener('click', () => {
-                const name = nameInput.value.trim();
-                if (name.length >= 2) {
-                    saveName(name);
-                    modal.classList.remove('active');
-                }
-            });
-
-            // Handle enter key
-            nameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && nameInput.value.trim().length >= 2) {
-                    saveName(nameInput.value.trim());
-                    modal.classList.remove('active');
-                }
-            });
-        }
-
-        function saveName(name) {
-            localStorage.setItem('userName', name);
-            document.querySelector('h1').textContent = getGreeting(name);
-        }
-
-        // Sayfa yüklendiğinde isim kontrolü
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedName = localStorage.getItem('userName');
-            if (savedName) {
-                document.querySelector('h1').textContent = getGreeting(savedName);
-            } else {
-                document.querySelector('h1').textContent = 'Welcome!';
-                showNamePrompt();
-            }
-        });
-
-        // Puan işleme fonksiyonları
-        function createCelebration() {
-            const colors = ['#ff4081', '#2196f3', '#4caf50', '#ffc107', '#9c27b0', '#ff5722'];
-            const celebration = document.createElement('div');
-            celebration.className = 'celebration';
-            document.body.appendChild(celebration);
-
-            // 20 balon oluştur
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    const balloon = document.createElement('div');
-                    balloon.className = 'balloon';
-                    balloon.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    balloon.style.left = Math.random() * 100 + 'vw';
-                    balloon.style.animationDelay = Math.random() * 2 + 's';
-                    // Balonun before elementinin rengini de ayarla
-                    balloon.style.setProperty('--balloon-color', balloon.style.background);
-                    celebration.appendChild(balloon);
-
-                    // Animasyon bitince balonu kaldır
-                    setTimeout(() => balloon.remove(), 4000);
-                }, i * 100);
-            }
-
-            // Tüm balonları temizle
-            setTimeout(() => celebration.remove(), 6000);
-        }
-
-        function showMotivationMessage(rating) {
-            const motivationMessages = {
-                1: {
-                    message: "Don't give up! Everyone starts somewhere. Let's try a different approach! 💪",
-                    tips: ["Take a deep breath", "Break down your thoughts", "Try being more specific"]
-                },
-                2: {
-                    message: "You're on the right track! Small improvements lead to big results! 🌱",
-                    tips: ["Add more details", "Consider the context", "Try a different perspective"]
-                },
-                3: {
-                    message: "Getting better! Keep pushing forward! 🚀",
-                    tips: ["Expand your explanation", "Use concrete examples", "Be more persuasive"]
-                },
-                4: {
-                    message: "Almost halfway there! You've got this! 🎯",
-                    tips: ["Support your arguments", "Address counterpoints", "Add evidence"]
-                },
-                5: {
-                    message: "Halfway point reached! Time to level up! ⭐",
-                    tips: ["Strengthen your main points", "Add supporting details", "Consider the audience"]
-                },
-                6: {
-                    message: "So close to excellence! Just needs a little polish! ✨",
-                    tips: ["Refine your language", "Add compelling examples", "Make it more engaging"]
-                }
-            };
-
-            const modal = document.createElement('div');
-            modal.className = 'motivation-modal';
-            modal.innerHTML = `
-                <div class="motivation-content">
-                    <h3>Keep Going! 🎯</h3>
-                    <p class="motivation-score">Current Score: ${rating}/10</p>
-                    <p class="motivation-message">${motivationMessages[rating]?.message || "You can do better! Keep trying! 💫"}</p>
-                    <button class="try-again-button">Try Again!</button>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            // Try Again butonuna tıklandığında
-            modal.querySelector('.try-again-button').addEventListener('click', () => {
-                modal.remove();
-                chatContainer.innerHTML = ''; // Clear the chat container
-                messageInput.focus();
-            });
-        }
-
-        // Klavye açıldığında viewport yüksekliğini düzelt
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                document.documentElement.style.height = `${window.innerHeight}px`;
-                document.body.style.height = `${window.innerHeight}px`;
-            }
-        });
-
-
-        // Pencere boyutu değiştiğinde yüksekliği tekrar ayarla
-        window.addEventListener('resize', adjustChatBoxHeight);
-
-        // Sayfa yüklendiğinde başlangıç yüksekliğini ayarla
-        window.addEventListener('DOMContentLoaded', adjustChatBoxHeight);
-
-    
-
-        // Textarea auto-resize fonksiyonu
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            
-            // Maksimum yüksekliği 300px'e çıkardık
-            const newHeight = Math.min(textarea.scrollHeight, 300);
-            textarea.style.height = `${newHeight}px`;
-        }
-
-        // Event listener'ları ekleyelim
-        document.addEventListener('DOMContentLoaded', () => {
-            const messageInput = document.getElementById('messageInput');
-            
-            // Input her değiştiğinde
-            messageInput.addEventListener('input', () => {
-                autoResize(messageInput);
-            });
-            
-            // Enter tuşuna basıldığında
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault(); // Enter'ın varsayılan davranışını engelle
-                    sendMessage();
-                    // Mesaj gönderildikten sonra textarea'yı sıfırla
-                    messageInput.style.height = '45px';
-                }
-            });
-        });
-
-       
-        messageInput.addEventListener('focus', () => {
-    setTimeout(() => {
+        messageDiv.appendChild(iconDiv);
+        messageDiv.appendChild(contentDiv);
+        
+        chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 300);
-});
+    }
 
+    // Event Listeners
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('input', () => {
+        autoResize(messageInput);
+    });
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+            // Mesaj gönderildikten sonra textarea'yı sıfırla
+            messageInput.style.height = 'auto';
+            autoResize(messageInput);
+        }
+    });
+    clearButton.addEventListener('click', () => {
+        chatContainer.innerHTML = '';
+    });
 
-       
-    </script>
+    messageInput.addEventListener('focus', () => {
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 300);
+    });
+
+    async function testBackend(message) {
+        try {
+            const res = await fetch('https://chat-backend-cqm9.onrender.com/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'omit',
+                body: JSON.stringify({ message })
+            });
+            
+            const data = await res.json();
+            return data.response;
+        } catch (error) {
+            console.error('Error:', error);
+            return 'An error occurred';
+        }
+    }
+
+    const settingsButton = document.getElementById('settingsButton');
+    const settingsMenu = document.getElementById('settingsMenu');
+
+    // Settings menüsü kontrolü
+    settingsButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.toggle('active');
+    });
+
+    // Sayfa herhangi bir yerine tıklandığında menüyü kapat
+    document.addEventListener('click', (e) => {
+        if (!settingsMenu.contains(e.target) && !settingsButton.contains(e.target)) {
+            settingsMenu.classList.remove('active');
+        }
+    });
+
+    // Selamlama ve modal işlemleri için fonksiyonlar
+    function getGreeting(name) {
+        const hour = new Date().getHours();
+        let greeting;
+        let icon;
+        
+        if (hour >= 5 && hour < 12) {
+            greeting = 'Good morning';
+            icon = '☀️'; // Güneş
+        } else if (hour >= 12 && hour < 18) {
+            greeting = 'Good afternoon';
+            icon = '🌤️'; // Güneşli bulut
+        } else {
+            greeting = 'Good evening';
+            icon = '🌙'; // Ay
+        }
+        
+        // Ünlem işareti ve emojileri ekleyelim
+        return `${greeting}, ${name}! ${icon} 💚`;
+    }
+
+    function showNamePrompt() {
+        const modal = document.getElementById('welcomeModal');
+        const nameInput = document.getElementById('nameInput');
+        const startButton = document.getElementById('startButton');
+        
+        modal.classList.add('active');
+        nameInput.focus();
+
+        // Input validation
+        nameInput.addEventListener('input', () => {
+            const name = nameInput.value.trim();
+            startButton.disabled = name.length < 2;
+        });
+
+        // Handle start button click
+        startButton.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name.length >= 2) {
+                saveName(name);
+                modal.classList.remove('active');
+            }
+        });
+
+        // Handle enter key
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && nameInput.value.trim().length >= 2) {
+                saveName(nameInput.value.trim());
+                modal.classList.remove('active');
+            }
+        });
+    }
+
+    function saveName(name) {
+        localStorage.setItem('userName', name);
+        document.querySelector('h1').textContent = getGreeting(name);
+    }
+
+    // Sayfa yüklendiğinde isim kontrolü
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('userName');
+        if (savedName) {
+            document.querySelector('h1').textContent = getGreeting(savedName);
+        } else {
+            document.querySelector('h1').textContent = 'Welcome!';
+            showNamePrompt();
+        }
+    });
+
+    // Puan işleme fonksiyonları
+    function createCelebration() {
+        const colors = ['#ff4081', '#2196f3', '#4caf50', '#ffc107', '#9c27b0', '#ff5722'];
+        const celebration = document.createElement('div');
+        celebration.className = 'celebration';
+        document.body.appendChild(celebration);
+
+        // 20 balon oluştur
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.style.background = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.left = Math.random() * 100 + 'vw';
+                balloon.style.animationDelay = Math.random() * 2 + 's';
+                // Balonun before elementinin rengini de ayarla
+                balloon.style.setProperty('--balloon-color', balloon.style.background);
+                celebration.appendChild(balloon);
+
+                // Animasyon bitince balonu kaldır
+                setTimeout(() => balloon.remove(), 4000);
+            }, i * 100);
+        }
+
+        // Tüm balonları temizle
+        setTimeout(() => celebration.remove(), 6000);
+    }
+
+    function showMotivationMessage(rating) {
+        const motivationMessages = {
+            1: {
+                message: "Don't give up! Everyone starts somewhere. Let's try a different approach! 💪",
+                tips: ["Take a deep breath", "Break down your thoughts", "Try being more specific"]
+            },
+            2: {
+                message: "You're on the right track! Small improvements lead to big results! 🌱",
+                tips: ["Add more details", "Consider the context", "Try a different perspective"]
+            },
+            3: {
+                message: "Getting better! Keep pushing forward! 🚀",
+                tips: ["Expand your explanation", "Use concrete examples", "Be more persuasive"]
+            },
+            4: {
+                message: "Almost halfway there! You've got this! 🎯",
+                tips: ["Support your arguments", "Address counterpoints", "Add evidence"]
+            },
+            5: {
+                message: "Halfway point reached! Time to level up! ⭐",
+                tips: ["Strengthen your main points", "Add supporting details", "Consider the audience"]
+            },
+            6: {
+                message: "So close to excellence! Just needs a little polish! ✨",
+                tips: ["Refine your language", "Add compelling examples", "Make it more engaging"]
+            }
+        };
+
+        const modal = document.createElement('div');
+        modal.className = 'motivation-modal';
+        modal.innerHTML = `
+            <div class="motivation-content">
+                <h3>Keep Going! 🎯</h3>
+                <p class="motivation-score">Current Score: ${rating}/10</p>
+                <p class="motivation-message">${motivationMessages[rating]?.message || "You can do better! Keep trying! 💫"}</p>
+                <button class="try-again-button">Try Again!</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Try Again butonuna tıklandığında
+        modal.querySelector('.try-again-button').addEventListener('click', () => {
+            modal.remove();
+            chatContainer.innerHTML = ''; // Chat içeriğini temizle
+            messageInput.focus();
+        });
+    }
+
+    // Klavye açıldığında viewport yüksekliğini düzelt
+    window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+            document.documentElement.style.height = `${window.innerHeight}px`;
+            document.body.style.height = `${window.innerHeight}px`;
+        }
+    });
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+</script>
+
+  
+    
 
  </body></html>
